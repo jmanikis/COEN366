@@ -74,6 +74,9 @@ class ClientSide:
     def DOWNLOAD_ERROR(self, RQ, message):
         return self.generate_request("DOWNLOAD-ERROR", RQ, reason=message)
 
+    def get_client_from_file_name(self, file_name):
+        return self.CDBH.get_client_from_file_name(file_name)
+
     def generate_request(self, header, RQ, **kwargs):
         reply = {'header': header, 'RQ': RQ}
         reply.update(kwargs)

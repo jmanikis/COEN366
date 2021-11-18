@@ -92,6 +92,13 @@ class CDBHelper:
         except Exception as e:
             print(e)
 
+    def get_client_from_file_name(self, file_name):
+        clients = self.files_table.search(self.query.name == file_name)
+        if len(clients) == 0:
+            return None
+        else:
+            return clients[0]
+
     def does_client_exist(self, client):
         if type(client) != str:
             client = client['name']
