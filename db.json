@@ -1,1 +1,1 @@
-{"clients": {"1": {"name": "test_pc", "ip": "192.0.0.1", "tcp_socket": "69420", "files": []}}, "files": {}}
+{"clients": {"1": {"name": "testPC", "ip": "localhost", "tcp_socket": "9002", "files": []}}, "files": {}}
