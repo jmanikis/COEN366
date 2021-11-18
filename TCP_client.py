@@ -4,111 +4,108 @@ from ClientSide import ClientSide
 
 
 class TCP_client():
-        def __init__(self, host, port):
-            super(TCP_client, self).__init__()
-            self.socket = None
-            self.HOSTNAME = socket.gethostname()         # current IP
-            self.HOST = socket.gethostbyname(self.HOSTNAME)
-            self.LISTENING_PORT = 9002    # {port} get from server (should be randomly generated, hardcoded for now)
-            self.UDP = 9001               # hardcoded
-            self.TCP = (self.HOST, self.LISTENING_PORT)
-            self.cs = ClientSide(self.name, self.HOST, self.UDP, self.TCP)
+    def __init__(self):
+        super(TCP_client, self).__init__()
+        self.socket = None
+        self.HOSTNAME = socket.gethostname()  # current IP
+        self.HOST = socket.gethostbyname(self.HOSTNAME)
+        self.LISTENING_PORT = 9002  # {port}
+        # get from server (should be randomly generated, hardcoded for now)
+        self.UDP = 9001  # hardcoded
+        self.TCP = (self.HOST, self.LISTENING_PORT)
+        self.cs = ClientSide(self.name, self.HOST, self.UDP, self.TCP)
 
-        def run(self):
-            self.createSocket()
+    def run(self):
+        self.createSocket()
+        self.bindSocket()
+        self.acceptingConnection()
+
+    # ------------------------TCP-------------------------------
+    #      PEER COMMUNICATION - Acting Server Side
+    # ----------------------------------------------------------
+    def createSocket(self):
+        try:
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        except socket.error as msg:
+            print("Socket creation error: " + str(msg))
+
+    # Binding the Socket and listening for connections
+    def bindSocket(self):
+        try:
+
+            print("Binding the port: " + str(self.LISTENING_PORT))
+
+            # bind socket
+            self.socket.bind((self.HOST, self.LISTENING_PORT))
+
+            # listen for connections (max 1 bad connections before throwing error)
+            # only listen in TCP.
+            self.socket.listen(1)
+
+        except socket.error as msg:
+            print("Socket binding error: " + str(msg) + "\n" + "Retrying....")
             self.bindSocket()
-            self.acceptingConnection()
 
-        # ------------------------TCP-------------------------------
-        #      PEER COMMUNICATION - Acting Server Side
-        # ----------------------------------------------------------
-        def createSocket(self):
+    # Establish connections with another Client (Socket must be listening)
+    def acceptingConnection(self):
+        while True:
             try:
-                self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                conn, address = self.socket.accept()
 
-            except socket.error as msg:
-                print("Socket creation error: " + str(msg))
+                # Prevent timeout from happening
+                self.socket.setblocking(1)
 
-        # Binding the Socket and listening for connections
-        def bindSocket(self):
-            try:
+                print("Connection has been established with IP: " + address[0] + " | Port : " + str(address[1]))
+                request = self.socket.recv(1024)
+                request_dict = json.loads(request)
 
-                print("Binding the port: " + str(self.LISTENING_PORT))
+                file_contents = self.cs.parse_reply(request_dict)  # list of dictionaries
 
-                # bind socket
-                self.socket.bind((self.HOST, self.LISTENING_PORT))
+                for file_dict in file_contents:
+                    json_chunk = json.dumps(file_dict)
+                    self.sendFile(conn, json_chunk)
+                print("Data Has been transmitted Successfully")
+                conn.close()
 
-                # listen for connections (max 1 bad connections before throwing error)
-                # only listen in TCP.
-                self.socket.listen(1)
-
-            except socket.error as msg:
-                print("Socket binding error: " + str(msg) + "\n" + "Retrying....")
-                self.bindSocket()
-
-
-        # Establish connections with another Client (Socket must be listening)
-        def acceptingConnection(self):
-            while True:
-                try:
-                    conn, address = self.socket.accept()
-
-                    # Prevent timeout from happening
-                    self.socket.setblocking(1)
-
-                    print("Connection has been established with IP: " + address[0] + " | Port : " + str(address[1]))
-                    request = self.socket.recv(1024)
-                    request_dict = json.loads(request)
-
-                    file_contents = self.cs.parse_reply(request_dict) # list of dictionaries
-
-                    for file_dict in file_contents:
-                        json_chunk = json.dumps(file_dict)
-                        self.sendFile(conn, json_chunk)
-                    print("Data Has been transmitted Successfully")
-                    conn.close()
-
-                except:
-                    print("Error accepting connections")
-
-        def sendFile(self, conn, chunk_content):
-            conn.sendall(bytes(chunk_content, encoding='utf-8'))
-
-
-        # ------------------------TCP-------------------------------
-        #       PEER COMMUNICATION - Acting Client Side
-        # ----------------------------------------------------------
-        def receivingClient(self):
-            rSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            file_name = input("Please enter the name of the requested file: ")
-            try:
-                client = self.cs.get_client_from_file_name(file_name)
-                if client is not None:
-                    rSocket.connect(client['tcp_socket'])
-                    print("Connected to :" + client['tcp_socket'])
-
-                    request_dict = self.cs.DOWNLOAD(file_name)
-                    json_request_dict = json.dumps(request_dict)
-                    rSocket.sendall(bytes(json_request_dict, encoding='utf-8'))
-                    print("Data Has been transmitted Successfully")
-
-
-                    # RECEIVE DATA
-                    while True:
-                        received = rSocket.recv(1024)
-                        data = json.loads(received)
-                        self.cs.parse_reply(data)           # Send json to database and loop to get all dictionaries to database.
-                        if data['header'] == "END-FILE":
-                            break
-
-                    print(data)
-
-                else:
-                    print("No Clients Have The Requested File.")
             except:
-                print("Error Retrieving Client")
+                print("Error accepting connections")
+
+    def sendFile(self, conn, chunk_content):
+        conn.sendall(bytes(chunk_content, encoding='utf-8'))
+
+    # ------------------------TCP-------------------------------
+    #       PEER COMMUNICATION - Acting Client Side
+    # ----------------------------------------------------------
+    def receivingClient(self):
+        rSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        file_name = input("Please enter the name of the requested file: ")
+        try:
+            client = self.cs.get_client_from_file_name(file_name)
+            if client is not None:
+                rSocket.connect(client['tcp_socket'])
+                print("Connected to :" + client['tcp_socket'])
+
+                request_dict = self.cs.DOWNLOAD(file_name)
+                json_request_dict = json.dumps(request_dict)
+                rSocket.sendall(bytes(json_request_dict, encoding='utf-8'))
+                print("Data Has been transmitted Successfully")
+
+                # RECEIVE DATA
+                while True:
+                    received = rSocket.recv(1024)
+                    data = json.loads(received)
+                    self.cs.parse_reply(data)  # Send json to database and loop to get all dictionaries to database.
+                    if data['header'] == "END-FILE":
+                        break
+
+                print(data)
+
+            else:
+                print("No Clients Have The Requested File.")
+        except:
+            print("Error Retrieving Client")
 
 
-
-
-
+client1 = TCP_client()
+print("test")
