@@ -52,6 +52,7 @@ class TCP_client():
     def acceptingConnection(self):
         while True:
             try:
+                print("waiting for connection")
                 conn, address = self.socket.accept()
 
                 # Prevent timeout from happening
