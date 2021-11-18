@@ -77,18 +77,18 @@ class TCP_client():
         # ------------------------TCP-------------------------------
         #       PEER COMMUNICATION - Acting Client Side
         # ----------------------------------------------------------
-        def sendingClient(self):
-            sendingSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sendingHost = input(str("Please enter the host address of the sender"))
-            sendingPort = 8081
-            s.connect((host, port))
-            print("Connected..")
-
-            fileName = input(str("Please enter a filename for the incoming file: "))
-            file = open(fileName, 'wb')
-            fileData = s.recv(200)
-            file.write(fileData)
-            file.close()
-            print("File has been received successfully")
-
+        # def sendingClient(self):
+        #     sendingSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #     sendingHost = input(str("Please enter the host address of the sender"))
+        #     sendingPort = 8081
+        #     s.connect((host, port))
+        #     print("Connected..")
+        #
+        #     fileName = input(str("Please enter a filename for the incoming file: "))
+        #     file = open(fileName, 'wb')
+        #     fileData = s.recv(200)
+        #     file.write(fileData)
+        #     file.close()
+        #     print("File has been received successfully")
+        #
 
