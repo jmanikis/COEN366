@@ -106,8 +106,3 @@ class TCP_client():
                 print("No Clients Have The Requested File.")
         except:
             print("Error Retrieving Client")
-
-
-client1 = TCP_client()
-client1.run()
-print("test")
