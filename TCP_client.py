@@ -1,5 +1,7 @@
 import json
 import socket
+import traceback
+
 from ClientSide import ClientSide
 
 
@@ -83,6 +85,7 @@ class TCP_client():
         rSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         file_name = input("Please enter the name of the requested file: ")
         try:
+
             client = self.cs.get_client_from_file_name(file_name)
             if client is not None:
                 rSocket.connect(client['tcp_socket'])
@@ -106,4 +109,5 @@ class TCP_client():
             else:
                 print("No Clients Have The Requested File.")
         except:
+            traceback.print_exc()
             print("Error Retrieving Client")
