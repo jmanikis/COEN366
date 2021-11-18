@@ -40,6 +40,8 @@ def createSocket():
         port = 8081
         print("Socket Created.")
 
+        # TODO: if other client crashes, and not reached end of file, attempt to connect TCP again
+        #       
     except socket.error as msg:
         print("Socket creation error: " + str(msg))
 

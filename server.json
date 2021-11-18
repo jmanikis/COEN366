@@ -1,0 +1,1 @@
+{"clients": {"1": {"RQ": "3", "name": "vily", "ip": "0.0.0.0", "udp_socket": 8880, "tcp_socket": 8881, "files": ["file1.txt", "file2.txt"]}}}

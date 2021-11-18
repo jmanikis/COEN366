@@ -6,15 +6,16 @@ import server_checkMessage
 
 
 class UDP_server(threading.Thread):
-    def __init__(self, host, port):
+    def __init__(self, port):
         super(UDP_server, self).__init__()
-        self.HOST = host
+        self.s = socket
+        self.HOST = '0.0.0.0'
         self.PORT = port
-        #self.reg_users = registered_users.RegisteredUsers()
         self.accept_msg_type = "REGISTERED"
         self.deny_msg_type = "REGISTER-DENIED"
-        self.s = socket
+        
     def run(self):
+        print(self.HOST)
         self.initServer()
         self.listening()
 
@@ -27,11 +28,11 @@ class UDP_server(threading.Thread):
             d = self.s.recvfrom(1024)
             data = d[0]
             addr = d[1]
-
+            
             if not data:
                 break
 
-            self.startHelper(data, addr, s)
+            self.startHelper(data, addr, self.s)
             
     
     def startHelper(self, data, addr, s):
@@ -71,4 +72,8 @@ class UDP_server(threading.Thread):
             sys.exit()
 
         print ('Socket bind complete')
-    
+
+
+udp_server = UDP_server(8890)
+udp_server.start()
+udp_server.join()
