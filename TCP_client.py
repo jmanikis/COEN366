@@ -6,6 +6,7 @@ from ClientSide import ClientSide
 class TCP_client():
     def __init__(self):
         super(TCP_client, self).__init__()
+        self.name = "testPC"
         self.socket = None
         self.HOSTNAME = socket.gethostname()  # current IP
         self.HOST = socket.gethostbyname(self.HOSTNAME)
@@ -108,4 +109,5 @@ class TCP_client():
 
 
 client1 = TCP_client()
+client1.run()
 print("test")
