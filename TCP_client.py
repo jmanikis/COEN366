@@ -1,96 +1,94 @@
 import socket
-
-# ------------------------TCP-------------------------------
-#       PEER COMMUNICATION - Acting Client Side
-# ----------------------------------------------------------
-
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-host = input(str("Please enter the host address of the sender"))
-port = 8081
-s.connect((host, port))
-print("Connected..")
-
-fileName = input(str("Please enter a filename for the incoming file: "))
-file = open(fileName, 'wb')
-fileData = s.recv(200)
-file.write(fileData)
-file.close()
-print("File has been received successfully")
+from ClientSide import ClientSide
 
 
-# ------------------------TCP-------------------------------
-#       PEER COMMUNICATION - Acting Server Side
-# ----------------------------------------------------------
+class TCP_client():
+        def __init__(self, host, port):
+            super(TCP_client, self).__init__()
+            self.socket = None
+            self.HOSTNAME = socket.gethostname()         # current IP
+            self.HOST = socket.gethostbyname(self.HOSTNAME)
+            self.LISTENING_PORT = 9002    # {port} get from server (should be randomly generated, hardcoded for now)
+            self.UDP = 9001               # hardcoded
+            self.TCP = (self.HOST, self.LISTENING_PORT)
+            self.cs = ClientSide(self.name, self.HOST, self.UDP, self.TCP)
 
-import socket
+        def run(self):
+            self.createSocket()
+            self.bindSocket()
+            self.acceptingConnection()
 
+        # ------------------------TCP-------------------------------
+        #      PEER COMMUNICATION - Acting Server Side
+        # ----------------------------------------------------------
+        def createSocket(self):
+            try:
+                self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-# ------------------------TCP-------------------------------
-#      PEER COMMUNICATION - Acting Server Side
-# ----------------------------------------------------------
-def createSocket():
-    try:
-        global s
-        global host
-        global port
+            except socket.error as msg:
+                print("Socket creation error: " + str(msg))
 
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        host = socket.gethostname()
-        print(host)
-        port = 8081
-        print("Socket Created.")
+        # Binding the Socket and listening for connections
+        def bindSocket(self):
+            try:
 
-    except socket.error as msg:
-        print("Socket creation error: " + str(msg))
+                print("Binding the port: " + str(self.LISTENING_PORT))
 
+                # bind socket
+                self.socket.bind((self.HOST, self.LISTENING_PORT))
 
-# Binding the Socket and listening for connections
-def bindSocket():
-    try:
-        global host
-        global port
-        global s
+                # listen for connections (max 1 bad connections before throwing error)
+                # only listen in TCP.
+                self.socket.listen(1)
 
-        print("Binding the port: " + str(port))
-
-        # bind socket
-        s.bind((host, port))
-
-        # listen for connections (max 1 bad connections before throwing error)
-        # only listen in TCP.
-        s.listen(1)
-
-    except socket.error as msg:
-        print("Socket binding error: " + str(msg) + "\n" + "Retrying....")
-        bindSocket()
+            except socket.error as msg:
+                print("Socket binding error: " + str(msg) + "\n" + "Retrying....")
+                self.bindSocket()
 
 
-# Establish connections with another Client (Socket must be listening)
-def acceptingConnection():
-    while True:
-        try:
-            conn, address = s.accept()
+        # Establish connections with another Client (Socket must be listening)
+        def acceptingConnection(self):
+            while True:
+                try:
+                    conn, address = self.socket.accept()
 
-            # Prevent timeout from happening
-            s.setblocking(1)
+                    # Prevent timeout from happening
+                    self.socket.setblocking(1)
 
-            print("Connection has been established with IP: " + address[0] + " | Port : " + str(address[1]))
+                    print("Connection has been established with IP: " + address[0] + " | Port : " + str(address[1]))
 
-            # Put file transfer function here.
-            sendFile(conn)
-            conn.close()
+                    # Put file transfer function here.
+                    self.sendFile(conn)
+                    conn.close()
 
-        except:
-            print("Error accepting connections")
+                except:
+                    print("Error accepting connections")
 
 
-def sendFile(conn):
-    fileName = input(str("Please Enter the File Name Of the File you want to trasnfer"))
-    file = open(fileName, 'rb')
-    fileData = file.read(200)
-    conn.send(fileData)
-    print("Data Has been transmitted Successfully")
+        def sendFile(conn):
+            # TODO Change to Json dicts
+            fileName = input(str("Please Enter the File Name Of the File you want to trasnfer"))
+            file = open(fileName, 'rb')
+            fileData = file.read(200)
+            conn.send(fileData)
+            print("Data Has been transmitted Successfully")
 
-createSocket()
-bindSocket()
-acceptingConnection()
+
+        # ------------------------TCP-------------------------------
+        #       PEER COMMUNICATION - Acting Client Side
+        # ----------------------------------------------------------
+        def sendingClient(self):
+            sendingSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sendingHost = input(str("Please enter the host address of the sender"))
+            sendingPort = 8081
+            s.connect((host, port))
+            print("Connected..")
+
+            fileName = input(str("Please enter a filename for the incoming file: "))
+            file = open(fileName, 'wb')
+            fileData = s.recv(200)
+            file.write(fileData)
+            file.close()
+            print("File has been received successfully")
+
+
