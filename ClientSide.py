@@ -113,7 +113,7 @@ class ClientSide:
             pass
         elif header == "DOWNLOAD":
             RQ = dict_in['RQ']
-            file_name = ['file_name']
+            file_name = dict_in['file_name']
             check, reply = self.CDBH.DOWNLOAD(file_name)
             if check:
                 self.FILE(RQ, file_name, reply)
