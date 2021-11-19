@@ -87,6 +87,7 @@ class TCP_client():
         try:
 
             client = self.cs.get_client_from_file_name(file_name)
+            print(client)
             if client is not None:
                 rSocket.connect(client['tcp_socket'])
                 print("Connected to :" + client['tcp_socket'])
