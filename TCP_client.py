@@ -61,7 +61,7 @@ class TCP_client():
                 self.socket.setblocking(1)
 
                 print("Connection has been established with IP: " + address[0] + " | Port : " + str(address[1]))
-                request = self.socket.recv(1024)
+                request = conn.recv(1024)
                 request_dict = json.loads(request)
 
                 file_contents = self.cs.parse_reply(request_dict)  # list of dictionaries
