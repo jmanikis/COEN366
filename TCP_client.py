@@ -112,3 +112,7 @@ class TCP_client():
         except:
             traceback.print_exc()
             print("Error Retrieving Client")
+
+if __name__ == '__main__':
+    client1 = TCP_client()
+    client1.run()
