@@ -74,6 +74,9 @@ class ClientSide:
     def DOWNLOAD_ERROR(self, RQ, message):
         return self.generate_request("DOWNLOAD-ERROR", RQ, reason=message)
 
+    def get_client_from_file_name(self, file_name):
+        return self.CDBH.get_client_from_file_name(file_name)
+
     def generate_request(self, header, RQ, **kwargs):
         reply = {'header': header, 'RQ': RQ}
         reply.update(kwargs)
@@ -110,7 +113,7 @@ class ClientSide:
             pass
         elif header == "DOWNLOAD":
             RQ = dict_in['RQ']
-            file_name = ['file_name']
+            file_name = dict_in['file_name']
             check, reply = self.CDBH.DOWNLOAD(file_name)
             if check:
                 self.FILE(RQ, file_name, reply)

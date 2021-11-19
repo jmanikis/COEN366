@@ -49,7 +49,7 @@ class CDBHelper:
         try:
             if not self.path.is_dir():
                 os.mkdir(self.path)
-            file_path = Path(os.path.join(self.path, f"/{file_name}"))
+            file_path = Path(f"./files/{file_name}")
             iterator = 1
             chunks = []
             with open(file_path) as file:
@@ -91,6 +91,17 @@ class CDBHelper:
             self.download_table.remove(self.query.fragment(file_key))
         except Exception as e:
             print(e)
+
+    def get_client_from_file_name(self, file_name):
+        file = self.files_table.search(self.query.name == file_name)
+        if len(file) == 0:
+            return None
+        else:
+            clients = file[0]['clients']
+            if len(clients) == 0:
+                return None
+            else:
+                return clients[0]
 
     def does_client_exist(self, client):
         if type(client) != str:
