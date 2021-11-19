@@ -89,7 +89,7 @@ class TCP_client():
             print(client)
             if client is not None:
                 rSocket.connect(('localhost', client['tcp_socket']))
-                print("Connected to :" + client['tcp_socket'])
+                print(f"Connected to : {client['tcp_socket']}")
 
                 request_dict = self.cs.DOWNLOAD(file_name)
                 json_request_dict = json.dumps(request_dict)
