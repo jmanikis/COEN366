@@ -64,7 +64,9 @@ class TCP_client():
                 request = conn.recv(1024)
                 request_dict = json.loads(request)
 
+                print(request_dict)
                 file_contents = self.cs.parse_reply(request_dict)  # list of dictionaries
+                print(file_contents)
 
                 for file_dict in file_contents:
                     json_chunk = json.dumps(file_dict)
