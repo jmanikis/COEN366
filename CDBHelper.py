@@ -97,7 +97,7 @@ class CDBHelper:
         if len(file) == 0:
             return None
         else:
-            clients = file['clients']
+            clients = file[0]['clients']
             if len(clients) == 0:
                 return None
             else:
