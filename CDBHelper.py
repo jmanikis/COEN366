@@ -49,7 +49,7 @@ class CDBHelper:
         try:
             if not self.path.is_dir():
                 os.mkdir(self.path)
-            file_path = Path(os.path.join(self.path, f"/{file_name}"))
+            file_path = Path(f"./files/{file_name}")
             iterator = 1
             chunks = []
             with open(file_path) as file:
