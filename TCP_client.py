@@ -69,10 +69,11 @@ class TCP_client():
                 for file_dict in file_contents:
                     json_chunk = json.dumps(file_dict)
                     self.sendFile(conn, json_chunk)
+                    print(f"Chunk: {json_chunk}")
                 print("Data Has been transmitted Successfully")
                 conn.close()
-
             except:
+                traceback.print_exc()
                 print("Error accepting connections")
 
     def sendFile(self, conn, chunk_content):
