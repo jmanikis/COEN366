@@ -85,7 +85,6 @@ class TCP_client():
         rSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         file_name = input("Please enter the name of the requested file: ")
         try:
-
             client = self.cs.get_client_from_file_name(file_name)
             print(client)
             if client is not None:

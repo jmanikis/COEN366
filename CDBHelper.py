@@ -93,11 +93,15 @@ class CDBHelper:
             print(e)
 
     def get_client_from_file_name(self, file_name):
-        clients = self.files_table.search(self.query.name == file_name)
-        if len(clients) == 0:
+        file = self.files_table.search(self.query.name == file_name)
+        if len(file) == 0:
             return None
         else:
-            return clients[0]
+            clients = file['clients']
+            if len(clients) == 0:
+                return None
+            else:
+                return clients[0]
 
     def does_client_exist(self, client):
         if type(client) != str:
