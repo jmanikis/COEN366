@@ -102,7 +102,7 @@ class TCP_client():
                     received = rSocket.recv(1024)
                     data = json.loads(received)
                     self.cs.parse_reply(data)  # Send json to database and loop to get all dictionaries to database.
-                    if data['header'] == "END-FILE":
+                    if data['header'] == "FILE-END":
                         break
 
                 print(data)
