@@ -134,6 +134,7 @@ class ServerSide:
                 return self.generate_reply("SEARCH-ERROR", RQ, reason=response)
         except Exception as e:
             print(f"Exception in ServerSide.SEARCH_FILE: {e}")
+            traceback.print_exc()
             return self.generate_reply("SEARCH-ERROR", RQ, reason=str(e))
 
     def RETRIEVE_INFOT(self):

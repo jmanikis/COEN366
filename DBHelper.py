@@ -139,6 +139,7 @@ class DBHelper:
                     client['files'] = files
                 self.clients_table.remove(self.query.name == client['name'])
                 self.clients_table.insert(client)
+                print(client)
                 return True, None
             else:
                 return False, "Client not found."
@@ -157,8 +158,11 @@ class DBHelper:
             print(f"does_client_exist expecting Client or String, received {type(client)}")
             return None
         found_client = self.clients_table.search(self.query.name == client)
+        print(found_client)
         if len(found_client) == 1:
-            return found_client[0]
+            found_client = found_client[0]
+            found_client = Client.from_dict(found_client)
+            return found_client
         else:
             return None
 

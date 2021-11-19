@@ -34,12 +34,17 @@ class UDP_client(threading.Thread):
             msg_header = input("Enter header to send: ")
             msg_RQ = input("RQ: ")
             msg_name = input("Name: ")
-            msg_ip = self.HOST
+            msg_ip = '0.1.0.1'
             msg_tcp = 8881
-            msg_udp = self.PORT
+            msg_udp = 8882
+            msg_files = list(input("Files: "))
+            msg_file_name = input("File name: ")
+
+            #msg_json = json.dumps({"header" : msg_header, "RQ": msg_RQ, "name": msg_name,
+            #"ip": msg_ip, "tcp_socket":msg_tcp, "udp_socket":msg_udp, "file_name": msg_file_name})
 
             msg_json = json.dumps({"header" : msg_header, "RQ": msg_RQ, "name": msg_name,
-            "ip": msg_ip, "tcp_socket":msg_tcp, "udp_socket":msg_udp, "files": ["file1.txt", "file2.txt"]})
+            "ip": msg_ip, "tcp_socket":msg_tcp, "udp_socket":msg_udp, "file_name": msg_file_name, "files": ["file1.txt", "file2.txt"]})
             msg_encoded = msg_json.encode()
 
             try:

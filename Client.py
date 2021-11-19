@@ -34,4 +34,6 @@ class Client(dict):
             return None
         if 'files' in my_dict:
             files = my_dict['files']
-        return cls(name, ip, tcp_socket, files=files)
+        if 'udp_socket' in my_dict:
+            udp_socket = my_dict['udp_socket']
+        return cls(name, ip, tcp_socket, files=files, udp_socket=udp_socket)
