@@ -60,8 +60,8 @@ class ClientSide:
     def FILE(self, RQ, file_name, chunks):
         requests = []
         for chunk in chunks[:-1]:
-            chunk_number = chunk(0)
-            text = chunk(1)
+            chunk_number = chunk[0]
+            text = chunk[1]
             request = self.generate_request("FILE", RQ, file_name=file_name, chunk_number=chunk_number, text=text)
             requests.append(request)
         last_chunk = chunks[-1][0]
@@ -110,12 +110,12 @@ class ClientSide:
             pass
         elif header == "DOWNLOAD":
             RQ = dict_in['RQ']
-            file_name = ['file_name']
+            file_name = dict_in['file_name']
             check, reply = self.CDBH.DOWNLOAD(file_name)
             if check:
-                self.FILE(RQ, file_name, reply)
+                return self.FILE(RQ, file_name, reply)
             else:
-                self.DOWNLOAD_ERROR(RQ, reply)
+                return self.DOWNLOAD_ERROR(RQ, reply)
             pass
         elif header == "FILE":
             RQ = dict_in['RQ']
