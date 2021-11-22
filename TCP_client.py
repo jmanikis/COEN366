@@ -98,7 +98,9 @@ class TCP_client():
                 print(f"Connected to : {client['tcp_socket']}")
 
                 request_dict = self.cs.DOWNLOAD(file_name)
+                print(f"Request_dict: {request_dict} \n")
                 json_request_dict = json.dumps(request_dict)
+                print(f"JSON_Request_dict: {json_request_dict} \n")
                 rSocket.sendall(bytes(json_request_dict, encoding='utf-8'))
                 print("Data Has been transmitted Successfully")
 
