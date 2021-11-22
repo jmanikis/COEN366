@@ -12,7 +12,7 @@ class TCP_client():
         self.socket = None
         self.HOSTNAME = socket.gethostname()  # current IP
         self.HOST = socket.gethostbyname(self.HOSTNAME)
-        self.LISTENING_PORT = 9002  # {port}
+        self.LISTENING_PORT = 9003  # {port}
         # get from server (should be randomly generated, hardcoded for now)
         self.UDP = 9001  # hardcoded
         self.TCP = (self.HOST, self.LISTENING_PORT)
