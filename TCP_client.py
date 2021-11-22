@@ -68,7 +68,7 @@ class TCP_client():
                 file_contents = self.cs.parse_reply(request_dict)  # list of dictionaries
                 print(file_contents)
 
-                if file_contents['header'] is not 'DOWNLOAD-ERROR':
+                if file_contents['header'] != 'DOWNLOAD-ERROR':
                     for file_dict in file_contents:
                         json_chunk = json.dumps(file_dict)
                         self.sendFile(conn, json_chunk)
