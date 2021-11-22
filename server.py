@@ -11,8 +11,6 @@ class UDP_server(threading.Thread):
         self.s = socket
         self.HOST = '0.0.0.0'
         self.PORT = port
-        self.accept_msg_type = "REGISTERED"
-        self.deny_msg_type = "REGISTER-DENIED"
         
     def run(self):
         print(self.HOST)
@@ -74,6 +72,6 @@ class UDP_server(threading.Thread):
         print ('Socket bind complete')
 
 
-udp_server = UDP_server(8890)
+udp_server = UDP_server(8891)
 udp_server.start()
 udp_server.join()

@@ -14,8 +14,10 @@ class ServerCheckMessage(threading.Thread):
         self.serverSide = ServerSide()
     def run(self):
         print(self.msg)
-        msg_dict = ast.literal_eval((self.msg.decode('utf-8')))
+        msg_dict = json.loads(self.msg.decode('utf-8'))
         print(msg_dict)
+        print(type(msg_dict))
+    
         reply = self.serverSide.get_reply(msg_dict)
         reply_json = json.dumps(reply)
 
