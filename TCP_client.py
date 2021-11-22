@@ -40,7 +40,7 @@ class TCP_client():
             print("Binding the port: " + str(self.LISTENING_PORT))
 
             # bind socket
-            self.socket.bind((self.HOST, self.LISTENING_PORT))
+            self.socket.bind(("", self.LISTENING_PORT))
 
             # listen for connections (max 1 bad connections before throwing error)
             # only listen in TCP.
