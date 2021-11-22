@@ -89,7 +89,7 @@ class TCP_client():
         file_name = input("Please enter the name of the requested file: ")
         try:
             client = self.cs.get_client_from_file_name(file_name)
-            print(client)
+            print(f"Client: {client} \n")
             if client is not None:
                 rSocket.connect(('localhost', client['tcp_socket']))
                 print(f"Connected to : {client['tcp_socket']}")
