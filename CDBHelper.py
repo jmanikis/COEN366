@@ -1,3 +1,5 @@
+import traceback
+
 from tinydb import TinyDB
 from tinydb import Query
 from Client import Client
@@ -13,7 +15,7 @@ class CDBHelper:
         self.clients_table = self.db.table("clients")
         self.files_table = self.db.table("files")
         self.download_table = self.db.table("downloads")
-        self.path = Path("./files")
+        self.path = Path(".\\files")
 
     def RETRIEVE(self, data):
         try:
@@ -43,13 +45,17 @@ class CDBHelper:
             client = Client(name, ip, tcp_socket, files=files)
             self.clients_table.insert(client)
         except Exception as e:
+            traceback.print_exc()
             print(e)
 
     def DOWNLOAD(self, file_name):
         try:
             if not self.path.is_dir():
                 os.mkdir(self.path)
-            file_path = Path(f"./files/{file_name}")
+            file_path = Path(os.path.join(self.path, file_name))
+            if not file_path.is_file():
+                print(f"File {file_name} not found.")
+                return False, "File does not exist."
             iterator = 1
             chunks = []
             with open(file_path) as file:
@@ -61,6 +67,7 @@ class CDBHelper:
                     iterator += 1
             return True, chunks
         except Exception as e:
+            traceback.print_exc()
             print(e)
             return False, "Download error."
 
@@ -79,17 +86,17 @@ class CDBHelper:
             for chunk in chunks:
                 chunk_list.append((chunk['chunk_number'], chunk['text']))
             chunk_list.sort(key=lambda x: x[0])
-
-            file_path = Path(os.path.join(self.path, f"/{file_name}"))
+            # file_path = Path(os.path.join(self.path, "received.txt"))
+            file_path = Path(os.path.join(self.path, file_name))
             if file_path.is_file():
                 os.remove(file_path)
-
-            with(file_path, "a") as file:
+            with open(file_path, "a") as file:
                 for chunk in chunk_list:
                     file.write(chunk[1])
 
             self.download_table.remove(self.query.fragment(file_key))
         except Exception as e:
+            traceback.print_exc()
             print(e)
 
     def get_client_from_file_name(self, file_name):

@@ -17,41 +17,62 @@ class ClientSide:
         self.RQ = None
         self.SEARCH_FILE_name = None
 
+    # Use: request_dict = cs_obj.REGISTER() to get a dict to send to server.
     def REGISTER(self):
         return self.generate_request(
             "REGISTER", self.RQ, name=self.name, ip=self.ip, udp_socket=self.udp_socket, tcp_socket=self.tcp_socket)
 
+    # Use: request_dict = cs_obj.DE_REGISTER() to get a dict to send to server.
     def DE_REGISTER(self):
         return self.generate_request("DE-REGISTER", self.RQ, name=self.name)
 
+    # Use: request_dict = cs_obj.PUBLISH(file_list) to get a dict to send to server.
     def PUBLISH(self, files=None):
         if files is None:
             files = self.files
         return self.generate_request("PUBLISH", self.RQ, files=files)
 
+    # Use: request_dict = cs_obj.REMOVE(files_list) to get a dict to send to server.
     def REMOVE(self, files):
         if not type(files) == list:
             files = [files]
         return self.generate_request("REMOVE", self.RQ, files=files)
 
+    # Use: request_dict = cs_obj.RETRIEVE_ALL() to get a dict to send to server.
     def RETRIEVE_ALL(self):
         return self.generate_request("RETRIEVE-ALL", self.RQ)
 
+    # Use: request_dict = cs_obj.SEARCH_FILE(file_name_str) to get a dict to send to server.
     def SEARCH_FILE(self, file_name):
         self.SEARCH_FILE_name = file_name
         return self.generate_request("SEARCH_FILE", self.RQ, file_name=file_name)
 
+    # Use: request_dict = cs_obj.RETRIEVE_INFOT(client_name_str) to get a dict to send to server.
     def RETRIEVE_INFOT(self, name):
         return self.generate_request("RETRIEVE_INFOT", self.RQ, name=name)
 
-    def UPDATE_CONTACT(self):
+    # Use: request_dict = cs_obj.UPDATE_CONTACT() to get a dict to send to server.
+    # Note: Can optionally pass params to func for update
+    def UPDATE_CONTACT(self, ip=None, udp_socket=None, tcp_socket=None):
+        if ip is None:
+            ip = self.ip
+        else:
+            self.ip = ip
+        if udp_socket is None:
+            udp_socket = self.udp_socket
+        else:
+            self.udp_socket = udp_socket
+        if tcp_socket is None:
+            tcp_socket = self.tcp_socket
+        else:
+            self.tcp_socket = tcp_socket
         return self.generate_request(
             "UPDATE-CONTACT",
             self.RQ,
             name=self.name,
-            ip=self.ip,
-            udp_socket=self.udp_socket,
-            tcp_socket=self.tcp_socket)
+            ip=ip,
+            udp_socket=udp_socket,
+            tcp_socket=tcp_socket)
 
     def DOWNLOAD(self, file_name):
         return self.generate_request("DOWNLOAD", self.RQ, file_name=file_name)
@@ -60,8 +81,8 @@ class ClientSide:
     def FILE(self, RQ, file_name, chunks):
         requests = []
         for chunk in chunks[:-1]:
-            chunk_number = chunk(0)
-            text = chunk(1)
+            chunk_number = chunk[0]
+            text = chunk[1]
             request = self.generate_request("FILE", RQ, file_name=file_name, chunk_number=chunk_number, text=text)
             requests.append(request)
         last_chunk = chunks[-1][0]
@@ -116,9 +137,9 @@ class ClientSide:
             file_name = dict_in['file_name']
             check, reply = self.CDBH.DOWNLOAD(file_name)
             if check:
-                self.FILE(RQ, file_name, reply)
+                return self.FILE(RQ, file_name, reply)
             else:
-                self.DOWNLOAD_ERROR(RQ, reply)
+                return self.DOWNLOAD_ERROR(RQ, reply)
             pass
         elif header == "FILE":
             RQ = dict_in['RQ']
