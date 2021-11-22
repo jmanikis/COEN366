@@ -68,12 +68,15 @@ class TCP_client():
                 file_contents = self.cs.parse_reply(request_dict)  # list of dictionaries
                 print(file_contents)
 
-                for file_dict in file_contents:
-                    json_chunk = json.dumps(file_dict)
-                    self.sendFile(conn, json_chunk)
-                    print(f"Chunk: {json_chunk}")
-                print("Data Has been transmitted Successfully")
-                conn.close()
+                if file_contents['header'] is not 'DOWNLOAD-ERROR':
+                    for file_dict in file_contents:
+                        json_chunk = json.dumps(file_dict)
+                        self.sendFile(conn, json_chunk)
+                        print(f"Chunk: {json_chunk}")
+                    print("Data Has been transmitted Successfully")
+                    conn.close()
+                else:
+                    print(f"Download Error: {file_contents['reason']}")
             except:
                 traceback.print_exc()
                 print("Error accepting connections")
