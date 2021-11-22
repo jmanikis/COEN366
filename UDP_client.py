@@ -2,6 +2,7 @@ import socket
 import sys
 import threading
 import json
+from ClientSide import ClientSide
 
 
 class UDP_client(threading.Thread):
@@ -12,10 +13,18 @@ class UDP_client(threading.Thread):
         self.HOST = '0.0.0.0'    
         self.PORT = port 
         self.SERVER_HOST = 'localhost'
-        self.SERVER_PORT = 8890
+        self.SERVER_PORT = 8891
+        self.currentRQ = 0
+        self.nextRQ = 1
+        self.ip = "0.1.0.1"
+        self.tcp = 8881
+        self.udp = 8882
+        self.name = None
+        self.cs = None
     def run(self):
         self.client_init()
         self.bind_socket()
+        self.client_side_init()
         self.send_message()
 
 
@@ -29,23 +38,57 @@ class UDP_client(threading.Thread):
     def bind_socket(self):
         self.s.bind((self.HOST, self.PORT))
 
+    def client_side_init(self):
+        self.name = input("Please enter your name: ")
+        self.cs = ClientSide(self.name, self.ip, self.udp, self.tcp)
+
+    #   used in loop to choose request command to send to server.
+    def send_helper(self):
+        choices = [ "1.  REGISTER", "2.  RE-REGISTER",  "3.  PUBLISH",
+                    "4.  REMOVE", "5.  RETRIEVE-ALL", "6.  SEARCH-FILE",
+                    "7.  RETRIEVE-INFOT","8.  UPDATE-CONTACT", 
+                    "9.  DOWNLOAD"]
+        for c in choices:
+            print(c)
+        choice = input("Please enter the index of your choice: ")
+        return self.message_builder(choice)
+
+    #   send_helper calls this method.
+    def message_builder(self, choice):
+        if choice == '1':
+            return self.cs.REGISTER()
+        elif choice == '2':
+            return self.cs.DE_REGISTER()
+        elif choice == '3':
+            files = input("Please enter list of files to publish as a dict: ")
+            return self.cs.PUBLISH(files)
+        elif choice == '4': 
+            files = input("Please enter list of files to remove as a dict: ")
+            return self.cs.REMOVE(files)
+        elif choice == '5':
+            return self.cs.RETRIEVE_ALL()
+        elif choice == '6':
+            file = input("Please enter file to search: ")
+            return self.cs.SEARCH_FILE(file)
+        elif choice == '7':
+            name = input("Please enter the name of the person desired: ")
+            return self.cs.RETRIEVE_INFOT(name)
+        elif choice == '8':
+            return self.cs.UPDATE_CONTACT()
+        elif choice == '9': 
+            dl = input("Please enter the name of the file you would like to download: ")
+            return self.cs.DOWNLOAD(dl)
+        else:
+            choice = input("Please use one of the indexes, and try again: ")
+            return self.message_builder(choice)
+
     def send_message(self):
         while(1):
-            msg_header = input("Enter header to send: ")
-            msg_RQ = input("RQ: ")
-            msg_name = input("Name: ")
-            msg_ip = '0.1.0.1'
-            msg_tcp = 8881
-            msg_udp = 8882
-            msg_files = list(input("Files: "))
-            msg_file_name = input("File name: ")
 
-            #msg_json = json.dumps({"header" : msg_header, "RQ": msg_RQ, "name": msg_name,
-            #"ip": msg_ip, "tcp_socket":msg_tcp, "udp_socket":msg_udp, "file_name": msg_file_name})
+            msg = self.send_helper()
 
-            msg_json = json.dumps({"header" : msg_header, "RQ": msg_RQ, "name": msg_name,
-            "ip": msg_ip, "tcp_socket":msg_tcp, "udp_socket":msg_udp, "file_name": msg_file_name, "files": ["file1.txt", "file2.txt"]})
-            msg_encoded = msg_json.encode()
+            msg_json_cs = json.dumps(msg)
+            msg_encoded = msg_json_cs.encode()
 
             try:
                 print("UDP_client host: " + str(self.HOST))
@@ -63,6 +106,12 @@ class UDP_client(threading.Thread):
                 print("Server addr: " + str(addr[0]) + " " + str(addr[1]))
             except socket.error as msg:
                 print("Error " + str(msg))
+
+    
+
+
+        
+
 
 udp_client = UDP_client(8880)
 udp_client.start()

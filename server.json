@@ -1,1 +1,1 @@
-{"clients": {"2": {"RQ": "1", "name": "eway", "ip": "0.0.0.0", "udp_socket": 8880, "tcp_socket": 8881, "files": ["file1.txt", "file2.txt"]}, "3": {"RQ": "1", "name": "vily", "ip": "0.1.0.1", "udp_socket": 8882, "tcp_socket": 8881, "files": ["file1.txt", "file2.txt"]}}}
+{"clients": {"2": {"RQ": "1", "name": "eway", "ip": "0.0.0.0", "udp_socket": 8880, "tcp_socket": 8881, "files": ["file1.txt", "file2.txt"]}, "3": {"RQ": null, "name": "vily", "ip": "0.1.0.1", "udp_socket": 8882, "tcp_socket": 8881, "files": []}}}
