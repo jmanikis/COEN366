@@ -1,7 +1,7 @@
 import json
 import socket
 import traceback
-
+import time
 from ClientSide import ClientSide
 
 
@@ -68,15 +68,16 @@ class TCP_client():
                 file_contents = self.cs.parse_reply(request_dict)  # list of dictionaries
                 print(file_contents)
 
-                if file_contents['header'] != 'DOWNLOAD-ERROR':
+                if file_contents[0]['header'] != 'DOWNLOAD-ERROR':
                     for file_dict in file_contents:
                         json_chunk = json.dumps(file_dict)
                         self.sendFile(conn, json_chunk)
                         print(f"Chunk: {json_chunk}")
+                        time.sleep(0.1)
                     print("Data Has been transmitted Successfully")
                     conn.close()
                 else:
-                    print(f"Download Error: {file_contents['reason']}")
+                    print(f"Download Error: {file_contents[0]['reason']}")
             except:
                 traceback.print_exc()
                 print("Error accepting connections")
