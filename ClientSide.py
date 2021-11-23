@@ -48,8 +48,8 @@ class ClientSide:
         return self.generate_request("SEARCH-FILE", self.RQ, name=self.name, file_name=file_name)
 
     # Use: request_dict = cs_obj.RETRIEVE_INFOT(client_name_str) to get a dict to send to server.
-    def RETRIEVE_INFOT(self, name):
-        return self.generate_request("RETRIEVE-INFOT", self.RQ, name=self.name, client_name=name)
+    def RETRIEVE_INFOT(self, client_name):
+        return self.generate_request("RETRIEVE-INFOT", self.RQ, name=self.name, client_name=client_name)
 
     # Use: request_dict = cs_obj.UPDATE_CONTACT() to get a dict to send to server.
     # Note: Can optionally pass params to func for update
