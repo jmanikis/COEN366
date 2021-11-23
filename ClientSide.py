@@ -30,26 +30,26 @@ class ClientSide:
     def PUBLISH(self, files=None):
         if files is None:
             files = self.files
-        return self.generate_request("PUBLISH", self.RQ, files=files)
+        return self.generate_request("PUBLISH", self.RQ, name=self.name, files=files)
 
     # Use: request_dict = cs_obj.REMOVE(files_list) to get a dict to send to server.
     def REMOVE(self, files):
         if not type(files) == list:
             files = [files]
-        return self.generate_request("REMOVE", self.RQ, files=files)
+        return self.generate_request("REMOVE", self.RQ, name=self.name, files=files)
 
     # Use: request_dict = cs_obj.RETRIEVE_ALL() to get a dict to send to server.
     def RETRIEVE_ALL(self):
-        return self.generate_request("RETRIEVE-ALL", self.RQ)
+        return self.generate_request("RETRIEVE-ALL", self.RQ, name=self.name)
 
     # Use: request_dict = cs_obj.SEARCH_FILE(file_name_str) to get a dict to send to server.
     def SEARCH_FILE(self, file_name):
         self.SEARCH_FILE_name = file_name
-        return self.generate_request("SEARCH_FILE", self.RQ, file_name=file_name)
+        return self.generate_request("SEARCH-FILE", self.RQ, name=self.name, file_name=file_name)
 
     # Use: request_dict = cs_obj.RETRIEVE_INFOT(client_name_str) to get a dict to send to server.
     def RETRIEVE_INFOT(self, name):
-        return self.generate_request("RETRIEVE_INFOT", self.RQ, name=name)
+        return self.generate_request("RETRIEVE-INFOT", self.RQ, name=self.name, client_name=name)
 
     # Use: request_dict = cs_obj.UPDATE_CONTACT() to get a dict to send to server.
     # Note: Can optionally pass params to func for update

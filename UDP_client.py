@@ -60,7 +60,13 @@ class UDP_client(threading.Thread):
         elif choice == '2':
             return self.cs.DE_REGISTER()
         elif choice == '3':
-            files = input("Please enter list of files to publish as a dict: ")
+            files = []
+            while True:
+                file = input("Please enter list of files to publish as a dict: ")
+                if ".txt" in file:
+                    files.append(file)
+                else:
+                    break
             return self.cs.PUBLISH(files)
         elif choice == '4': 
             files = input("Please enter list of files to remove as a dict: ")

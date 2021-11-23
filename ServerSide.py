@@ -142,13 +142,13 @@ class ServerSide:
         RQ = None
         try:
             RQ = dict_in['RQ']
-            name = dict_in['name']
-            check, response = self.DBH.RETRIEVE_INFOT(name)
+            client_name = dict_in['client_name']
+            check, response = self.DBH.RETRIEVE_INFOT(client_name)
             if check:
                 ip = response['ip']
                 tcp = response['tcp_socket']
                 files = response['files']
-                return self.generate_reply("RETRIEVE-INFOT", RQ, name=name, ip=ip, tcp_socket=tcp, files=files)
+                return self.generate_reply("RETRIEVE-INFOT", RQ, name=client_name, ip=ip, tcp_socket=tcp, files=files)
             else:
                 return self.generate_reply("RETRIEVE-ERROR", RQ, reason=response)
         except Exception as e:
