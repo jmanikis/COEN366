@@ -79,6 +79,8 @@ class ServerSide:
         dict_in = self.dict_in
         RQ = None
         try:
+            if self.DBH.does_client_exist(dict_in['name']) is None:
+                raise Exception("Not registered")
             name = dict_in['name']
             RQ = dict_in['RQ']
             files = dict_in['files']
@@ -95,6 +97,8 @@ class ServerSide:
         dict_in = self.dict_in
         RQ = None
         try:
+            if self.DBH.does_client_exist(dict_in['name']) is None:
+                raise Exception("Not registered")
             RQ = dict_in['RQ']
             name = dict_in['name']
             files = dict_in['files']
@@ -111,6 +115,8 @@ class ServerSide:
         dict_in = self.dict_in
         RQ = None
         try:
+            if self.DBH.does_client_exist(dict_in['name']) is None:
+                raise Exception("Not registered")
             RQ = dict_in['RQ']
             check, response = self.DBH.RETRIEVE_ALL()
             if check:
@@ -125,6 +131,8 @@ class ServerSide:
         dict_in = self.dict_in
         RQ = None
         try:
+            if self.DBH.does_client_exist(dict_in['name']) is None:
+                raise Exception("Not registered")
             RQ = dict_in['RQ']
             file_name = dict_in['file_name']
             check, response = self.DBH.SEARCH_FILE(file_name)
@@ -141,6 +149,8 @@ class ServerSide:
         dict_in = self.dict_in
         RQ = None
         try:
+            if self.DBH.does_client_exist(dict_in['name']) is None:
+                raise Exception("Not registered")
             RQ = dict_in['RQ']
             client_name = dict_in['client_name']
             check, response = self.DBH.RETRIEVE_INFOT(client_name)
@@ -160,6 +170,8 @@ class ServerSide:
         RQ = None
         name = None
         try:
+            if self.DBH.does_client_exist(dict_in['name']) is None:
+                raise Exception("Not registered")
             RQ = dict_in['RQ']
             name = dict_in['name']
             ip = dict_in['ip']
