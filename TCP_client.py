@@ -95,7 +95,7 @@ class TCP_client():
             client = self.cs.get_client_from_file_name(file_name)
             print(f"Client: {client} \n")
             if client is not None:
-                rSocket.connect(('', client['tcp_socket']))
+                rSocket.connect(('localhost', client['tcp_socket']))
                 print(f"Connected to : {client['tcp_socket']}")
 
                 request_dict = self.cs.DOWNLOAD(file_name)
