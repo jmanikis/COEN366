@@ -10,15 +10,15 @@ class UDP_client(threading.Thread):
         super(UDP_client, self).__init__()
         self.s = socket 
         self.HOSTNAME = self.s.gethostname()
-        self.HOST = '0.0.0.0'    
+        self.HOST = self.s.gethostbyname(self.HOSTNAME)    
         self.PORT = port 
-        self.SERVER_HOST = 'localhost'
+        self.SERVER_HOST = None
         self.SERVER_PORT = 8891
         self.currentRQ = 0
         self.nextRQ = 1
-        self.ip = "0.1.0.1"
-        self.tcp = 8881
-        self.udp = 8882
+        self.ip = self.HOST
+        self.tcp = self.PORT + 1
+        self.udp = self.PORT
         self.name = None
         self.cs = None
     def run(self):
@@ -29,6 +29,7 @@ class UDP_client(threading.Thread):
 
 
     def client_init(self):
+        self.SERVER_HOST = input("Please enter the server IP")
         try:
             self.s = self.s.socket(socket.AF_INET, socket.SOCK_DGRAM)
         except socket.error:
@@ -81,9 +82,8 @@ class UDP_client(threading.Thread):
             return self.cs.RETRIEVE_INFOT(name)
         elif choice == '8':
             return self.cs.UPDATE_CONTACT()
-        elif choice == '9': 
-            dl = input("Please enter the name of the file you would like to download: ")
-            return self.cs.DOWNLOAD(dl)
+        elif choice == 'q': 
+            return None
         else:
             choice = input("Please use one of the indexes, and try again: ")
             return self.message_builder(choice)
@@ -92,6 +92,8 @@ class UDP_client(threading.Thread):
         while(1):
 
             msg = self.send_helper()
+            if msg is None:
+                break
 
             msg_json_cs = json.dumps(msg)
             msg_encoded = msg_json_cs.encode()

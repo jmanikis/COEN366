@@ -9,7 +9,8 @@ class UDP_server(threading.Thread):
     def __init__(self, port):
         super(UDP_server, self).__init__()
         self.s = socket
-        self.HOST = '0.0.0.0'
+        self.HOSTNAME = self.s.gethostname()
+        self.HOST = self.s.gethostbyname(self.HOSTNAME)
         self.PORT = port
         
     def run(self):
