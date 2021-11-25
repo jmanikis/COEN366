@@ -6,20 +6,20 @@ from ClientSide import ClientSide
 
 
 class UDP_client(threading.Thread):
-    def __init__(self, port):
-        super(UDP_client, self).__init__()
+    def __init__(self, name, UDP_port, TCP_port, host, server_host, server_port):
         self.s = socket 
-        self.HOSTNAME = self.s.gethostname()
-        self.HOST = self.s.gethostbyname(self.HOSTNAME)    
-        self.PORT = port 
-        self.SERVER_HOST = None
-        self.SERVER_PORT = 8891
+        # self.HOSTNAME = self.s.gethostname()
+        # self.HOST = self.s.gethostbyname(self.HOSTNAME)
+        self.HOST = host
+        self.PORT = UDP_port
+        self.SERVER_HOST = server_host
+        self.SERVER_PORT = server_port
         self.currentRQ = 0
         self.nextRQ = 1
         self.ip = self.HOST
-        self.tcp = self.PORT + 1
+        self.tcp = TCP_port
         self.udp = self.PORT
-        self.name = None
+        self.name = name
         self.cs = None
     def run(self):
         self.client_init()
@@ -121,6 +121,6 @@ class UDP_client(threading.Thread):
         
 
 
-udp_client = UDP_client(8880)
-udp_client.start()
-udp_client.join()
+#udp_client = UDP_client(8880)
+#udp_client.start()
+#udp_client.join()

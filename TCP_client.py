@@ -6,14 +6,15 @@ from ClientSide import ClientSide
 
 
 class TCP_client:
-    def __init__(self):
-        self.name = "testPC"
+    def __init__(self, name, UDP_port, TCP_port, host, server_host, server_port):
+        self.name = name
         self.socket = None
-        self.HOSTNAME = socket.gethostname()  # current IP
-        self.HOST = socket.gethostbyname(self.HOSTNAME)
-        self.LISTENING_PORT = 9003  # {port}
+        # self.HOSTNAME = socket.gethostname()  # current IP
+        # self.HOST = socket.gethostbyname(self.HOSTNAME)
+        self.HOST = host
+        self.LISTENING_PORT = TCP_port  # {port}
         # get from server (should be randomly generated, hardcoded for now)
-        self.UDP = 9001  # hardcoded
+        self.UDP = UDP_port  # hardcoded
         self.TCP = (self.HOST, self.LISTENING_PORT)
         self.cs = ClientSide(self.name, self.HOST, self.UDP, self.TCP)
 
