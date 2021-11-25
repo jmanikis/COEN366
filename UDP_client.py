@@ -7,7 +7,8 @@ from ClientSide import ClientSide
 
 class UDP_client(threading.Thread):
     def __init__(self, name, UDP_port, TCP_port, host, server_host, server_port):
-        self.s = socket 
+        super().__init__(name)
+        self.s = socket
         # self.HOSTNAME = self.s.gethostname()
         # self.HOST = self.s.gethostbyname(self.HOSTNAME)
         self.HOST = host
