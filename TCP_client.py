@@ -5,9 +5,8 @@ import time
 from ClientSide import ClientSide
 
 
-class TCP_client():
+class TCP_client:
     def __init__(self):
-        super(TCP_client, self).__init__()
         self.name = "testPC"
         self.socket = None
         self.HOSTNAME = socket.gethostname()  # current IP
