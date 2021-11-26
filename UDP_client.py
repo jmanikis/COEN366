@@ -67,24 +67,14 @@ class UDP_client(threading.Thread):
         elif choice == '2':
             return self.cs.DE_REGISTER()
         elif choice == '3':
-            files = []
-            # while True:
-            #     file = input("Please enter list of files to publish as a dict: ")
-            #     if ".txt" in file:
-            #         files.append(file)
-            #     else:
-            #         break
-            # return self.cs.PUBLISH(files)
+            return self.cs.PUBLISH(arg)
         elif choice == '4':
-            # files = input("Please enter list of files to remove as a dict: ")
             return self.cs.REMOVE(arg)
         elif choice == '5':
             return self.cs.RETRIEVE_ALL()
         elif choice == '6':
-            # file = input("Please enter file to search: ")
             return self.cs.SEARCH_FILE(arg)
         elif choice == '7':
-            # name = input("Please enter the name of the person desired: ")
             return self.cs.RETRIEVE_INFOT(arg)
         elif choice == '8':
             return self.cs.UPDATE_CONTACT()
@@ -105,38 +95,43 @@ class UDP_client(threading.Thread):
         try:
             print("UDP_client host: " + str(self.HOST))
             print("UDP_client port: " + str(self.PORT))
+            
+
             print(msg_encoded)
+            print(type(msg_encoded))
+            print(self.SERVER_HOST)
+            print(self.SERVER_PORT)
             self.s.sendto(msg_encoded, (self.SERVER_HOST, self.SERVER_PORT))
 
             print("DATA SENT")
 
-            while(self.timeout_counter >= 0):
+            while(self.timeout_counter > 0):
                 try: 
-                    d = self.s.recvfrom(1024)
+                    d = self.s.recvfrom(4096)
                     reply = d[0]
                     addr = d[1]
                     self.timeout_counter = 3
                     break
-                except self.s.Timeouterror:
+                except Exception as err:
                     self.timeout_counter = self.timeout_counter - 1
-                    print("Timed out - retrying...")
+                    print("Timed out - retrying...", err)
             
             if(self.timeout_counter == 0):
                 reply = "Time-out 3 times, server not responding."
+                self.timeout_counter = 3
+            else:
+                print("Server reply: " + reply.decode())
+                print("Server addr: " + str(addr[0]) + " " + str(addr[1]))
+                reply = json.loads(reply.decode())
+                self.cs.parse_reply(reply)
+                
 
             # TODO: If not acknowledged, send it again
-
-            print("Server reply: " + reply.decode())
-            print("Server addr: " + str(addr[0]) + " " + str(addr[1]))
-
-            
-                
             # TODO: json.loads reply as dict and pass to self.cs.parse_reply(reply)
             # TODO: return self.cs.parse_reply(reply)
         except socket.error as msg:
             print("Error " + str(msg))
-        
-        print("UDP_CLIENT " + str(reply))
+    
         return reply
 
 # udp_client = UDP_client(8880)

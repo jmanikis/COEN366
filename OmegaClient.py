@@ -16,8 +16,8 @@ class OmegaClient:
         self.TCP_port = 9091
         self.TCP_client = None
         self.UDP_client = None
-        self.server_host = None
-        self.server_port = None
+        self.server_host = "192.168.211.1"
+        self.server_port = 8891
         self.name = None
         # GUI
         self.status = "Waiting for initial settings."
