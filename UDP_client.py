@@ -7,7 +7,7 @@ from ClientSide import ClientSide
 
 class UDP_client(threading.Thread):
     def __init__(self, name, UDP_port, TCP_port, host, server_host, server_port):
-        super().__init__(name)
+        super(UDP_client, self).__init__()
         self.s = socket
         # self.HOSTNAME = self.s.gethostname()
         # self.HOST = self.s.gethostbyname(self.HOSTNAME)
@@ -21,13 +21,13 @@ class UDP_client(threading.Thread):
         self.tcp = TCP_port
         self.udp = self.PORT
         self.name = name
-        self.cs = None
+        self.cs = ClientSide(self.name, self.HOST, self.udp, self.tcp)
+
     def run(self):
         self.client_init()
         self.bind_socket()
         self.client_side_init()
         self.send_message()
-
 
     def client_init(self):
         self.SERVER_HOST = input("Please enter the server IP")
@@ -36,7 +36,7 @@ class UDP_client(threading.Thread):
         except socket.error:
             print("Failed to create socket")
             sys.exit()
-        
+
     def bind_socket(self):
         self.s.bind((self.HOST, self.PORT))
 
@@ -46,53 +46,53 @@ class UDP_client(threading.Thread):
 
     #   used in loop to choose request command to send to server.
     def send_helper(self):
-        choices = [ "1.  REGISTER", "2.  RE-REGISTER",  "3.  PUBLISH",
-                    "4.  REMOVE", "5.  RETRIEVE-ALL", "6.  SEARCH-FILE",
-                    "7.  RETRIEVE-INFOT","8.  UPDATE-CONTACT", 
-                    "9.  DOWNLOAD"]
+        choices = ["1.  REGISTER", "2.  RE-REGISTER", "3.  PUBLISH",
+                   "4.  REMOVE", "5.  RETRIEVE-ALL", "6.  SEARCH-FILE",
+                   "7.  RETRIEVE-INFOT", "8.  UPDATE-CONTACT",
+                   "9.  DOWNLOAD"]
         for c in choices:
             print(c)
         choice = input("Please enter the index of your choice: ")
         return self.message_builder(choice)
 
     #   send_helper calls this method.
-    def message_builder(self, choice):
+    def message_builder(self, choice, arg=None):
         if choice == '1':
             return self.cs.REGISTER()
         elif choice == '2':
             return self.cs.DE_REGISTER()
         elif choice == '3':
             files = []
-            while True:
-                file = input("Please enter list of files to publish as a dict: ")
-                if ".txt" in file:
-                    files.append(file)
-                else:
-                    break
-            return self.cs.PUBLISH(files)
-        elif choice == '4': 
-            files = input("Please enter list of files to remove as a dict: ")
-            return self.cs.REMOVE(files)
+            # while True:
+            #     file = input("Please enter list of files to publish as a dict: ")
+            #     if ".txt" in file:
+            #         files.append(file)
+            #     else:
+            #         break
+            # return self.cs.PUBLISH(files)
+        elif choice == '4':
+            # files = input("Please enter list of files to remove as a dict: ")
+            return self.cs.REMOVE(arg)
         elif choice == '5':
             return self.cs.RETRIEVE_ALL()
         elif choice == '6':
-            file = input("Please enter file to search: ")
-            return self.cs.SEARCH_FILE(file)
+            # file = input("Please enter file to search: ")
+            return self.cs.SEARCH_FILE(arg)
         elif choice == '7':
-            name = input("Please enter the name of the person desired: ")
-            return self.cs.RETRIEVE_INFOT(name)
+            # name = input("Please enter the name of the person desired: ")
+            return self.cs.RETRIEVE_INFOT(arg)
         elif choice == '8':
             return self.cs.UPDATE_CONTACT()
-        elif choice == 'q': 
+        elif choice == 'q':
             return None
         else:
             choice = input("Please use one of the indexes, and try again: ")
             return self.message_builder(choice)
 
-    def send_message(self):
-        while(1):
+    def send_message(self, msg=None):
+        while 1:
 
-            msg = self.send_helper()
+            # msg = self.send_helper()
             if msg is None:
                 break
 
@@ -113,15 +113,11 @@ class UDP_client(threading.Thread):
 
                 print("Server reply: " + reply.decode())
                 print("Server addr: " + str(addr[0]) + " " + str(addr[1]))
+                # TODO: json.loads reply as dict and pass to self.cs.parse_reply(reply)
+                # TODO: return self.cs.parse_reply(reply)
             except socket.error as msg:
                 print("Error " + str(msg))
 
-    
-
-
-        
-
-
-#udp_client = UDP_client(8880)
-#udp_client.start()
-#udp_client.join()
+# udp_client = UDP_client(8880)
+# udp_client.start()
+# udp_client.join()

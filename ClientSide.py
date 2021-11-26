@@ -109,29 +109,32 @@ class ClientSide:
             assert type(header) == str
         except Exception as e:
             print(f"Exception in ClientSide.parse_reply: {e}")
-            return
+            return e
         if "DENIED" in header or "ERROR" in header:
-            pass
+            return f"{header}: {dict_in['reason']}"
         elif header == "REGISTERED":
-            pass
+            return header
         elif header == "PUBLISHED":
-            pass
+            return header
         elif header == "REMOVED":
-            pass
+            return header
         elif header == "RETRIEVE":
             data = dict_in['data']
             self.CDBH.RETRIEVE(data)
+            return header
         elif header == "SEARCH-FILE":
             data = dict_in['data']
             self.CDBH.SEARCH_FILE(self.SEARCH_FILE_name, data)
+            return header
         elif header == "RETRIEVE-INFOT":
             name = dict_in['name']
             ip = dict_in['ip']
             tcp_socket = dict_in['tcp_socket']
             files = dict_in['files']
             self.CDBH.RETRIEVE_INFOT(name, ip, tcp_socket, files)
+            return header
         elif header == "UPDATE-CONFIRMED":
-            pass
+            return header
         elif header == "DOWNLOAD":
             RQ = dict_in['RQ']
             file_name = dict_in['file_name']
@@ -140,7 +143,6 @@ class ClientSide:
                 return self.FILE(RQ, file_name, reply)
             else:
                 return self.DOWNLOAD_ERROR(RQ, reply)
-            pass
         elif header == "FILE":
             RQ = dict_in['RQ']
             file_name = dict_in['file_name']
