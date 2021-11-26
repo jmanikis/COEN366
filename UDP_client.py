@@ -25,6 +25,9 @@ class UDP_client(threading.Thread):
         self.cs = ClientSide(self.name, self.HOST, self.udp, self.tcp)
         self.timeout_counter = 3
 
+        self.client_init()
+        self.bind_socket()
+
     def run(self):
         self.client_init()
         self.bind_socket()
@@ -32,10 +35,9 @@ class UDP_client(threading.Thread):
         self.send_message()
 
     def client_init(self):
-        self.SERVER_HOST = input("Please enter the server IP")
         try:
             self.s = self.s.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            self.s.settimeout()
+            self.s.settimeout(5)
         except socket.error:
             print("Failed to create socket")
             sys.exit()
@@ -103,13 +105,10 @@ class UDP_client(threading.Thread):
         try:
             print("UDP_client host: " + str(self.HOST))
             print("UDP_client port: " + str(self.PORT))
-            
-
-
+            print(msg_encoded)
             self.s.sendto(msg_encoded, (self.SERVER_HOST, self.SERVER_PORT))
 
             print("DATA SENT")
-
 
             while(self.timeout_counter >= 0):
                 try: 

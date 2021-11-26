@@ -264,7 +264,7 @@ class OmegaClient:
 
     def startThread(self, message):
         que = queue.Queue()
-        client = UDP_message_helper.UDP_message_helper(message, que)
+        client = UDP_message_helper.UDP_message_helper(self.UDP_client, message, que)
         client.start()
         reply = que.get()
         return reply
