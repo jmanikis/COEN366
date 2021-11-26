@@ -128,6 +128,8 @@ class OmegaClient:
                     self.name, self.UDP_port, self.TCP_port, self.HOST, self.server_host, self.server_port)
                 self.UDP_client = UDP_client(
                     self.name, self.UDP_port, self.TCP_port, self.HOST, self.server_host, self.server_port)
+                if self.TCP_client is not None and self.UDP_client is not None:
+                    self.set_status("Awaiting command.")
             except Exception as e:
                 traceback.print_exc()
                 self.tk_status['text'] = f"Error: {e} ; Please enter valid port values."
@@ -157,11 +159,14 @@ class OmegaClient:
     def publish_button(self, event):
         if self.check_UDP():
             user_input = self.tk_input_entry.get()
-            user_input = user_input.split(',')
-            user_input = [s.strip() for s in user_input]
-            message = self.UDP_client.message_builder("3", user_input)
-            # reply = self.UDP_client.send_message(message)
-            reply = self.startThread(message)
+            if user_input == "" or user_input is None:
+                reply = "User input must be name of file(s)."
+            else:
+                user_input = user_input.split(',')
+                user_input = [s.strip() for s in user_input]
+                message = self.UDP_client.message_builder("3", user_input)
+                # reply = self.UDP_client.send_message(message)
+                reply = self.startThread(message)
         else:
             reply = "Name and ports, buddy."
         self.set_status(reply)
@@ -171,11 +176,14 @@ class OmegaClient:
     def remove_button(self, event):
         if self.check_UDP():
             user_input = self.tk_input_entry.get()
-            user_input = user_input.split(',')
-            user_input = [s.strip() for s in user_input]
-            message = self.UDP_client.message_builder("4", user_input)
-            # reply = self.UDP_client.send_message(message)
-            reply = self.startThread(message)
+            if user_input == "" or user_input is None:
+                reply = "User input must be name of file(s)."
+            else:
+                user_input = user_input.split(',')
+                user_input = [s.strip() for s in user_input]
+                message = self.UDP_client.message_builder("4", user_input)
+                # reply = self.UDP_client.send_message(message)
+                reply = self.startThread(message)
         else:
             reply = "Name and ports, buddy."
         self.set_status(reply)
@@ -196,9 +204,12 @@ class OmegaClient:
     def search_file_button(self, event):
         if self.check_UDP():
             user_input = self.tk_input_entry.get().strip()
-            message = self.UDP_client.message_builder("6", user_input)
-            # reply = self.UDP_client.send_message(message)
-            reply = self.startThread(message)
+            if user_input == "" or user_input is None:
+                reply = "User input must be name of a file."
+            else:
+                message = self.UDP_client.message_builder("6", user_input)
+                # reply = self.UDP_client.send_message(message)
+                reply = self.startThread(message)
         else:
             reply = "Name and ports, buddy."
         self.set_status(reply)
@@ -208,9 +219,12 @@ class OmegaClient:
     def retrieve_infot_button(self, event):
         if self.check_UDP():
             user_input = self.tk_input_entry.get().strip()
-            message = self.UDP_client.message_builder("7", user_input)
-            # reply = self.UDP_client.send_message(message)
-            reply = self.startThread(message)
+            if user_input == "" or user_input is None:
+                reply = "User input must be name of a client."
+            else:
+                message = self.UDP_client.message_builder("7", user_input)
+                # reply = self.UDP_client.send_message(message)
+                reply = self.startThread(message)
         else:
             reply = "Name and ports, buddy."
         self.set_status(reply)
