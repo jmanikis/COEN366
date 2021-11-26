@@ -5,6 +5,7 @@ from TCP_client import TCP_client
 import socket
 import tkinter as tk
 
+
 class OmegaClient:
     def __init__(self):
         self.HOSTNAME = socket.gethostname()
@@ -108,13 +109,15 @@ class OmegaClient:
 
     def save_button(self, event):
         self.name = self.tk_name_entry.get()
+        if self.name == "" or self.name is None:
+            self.set_status("Name can't be blank.")
         self.tk_name['text'] = f"Client name: {self.name}"
         self.UDP_port = self.tk_UDP_entry.get()
         self.tk_udp['text'] = f"UDP port: {self.UDP_port}"
         self.TCP_port = self.tk_TCP_entry.get()
         self.tk_tcp['text'] = f"TCP port: {self.TCP_port}"
         if len(self.UDP_port) > 5 or len(self.TCP_port) > 5:
-            pass
+            self.set_status("Please enter valid port values.")
         else:
             try:
                 self.TCP_port = int(self.TCP_port)
@@ -125,7 +128,7 @@ class OmegaClient:
                     self.name, self.UDP_port, self.TCP_port, self.HOST, self.server_host, self.server_port)
             except Exception as e:
                 traceback.print_exc()
-                self.tk_status['text'] = f"Error: {e}"
+                self.tk_status['text'] = f"Error: {e} ; Please enter valid port values."
 
     def register_button(self, event):
         if self.check_UDP():
