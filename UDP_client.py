@@ -3,6 +3,7 @@ import sys
 import threading
 import json
 from ClientSide import ClientSide
+import select
 
 
 class UDP_client(threading.Thread):
@@ -22,6 +23,7 @@ class UDP_client(threading.Thread):
         self.udp = self.PORT
         self.name = name
         self.cs = ClientSide(self.name, self.HOST, self.udp, self.tcp)
+        self.timeout_counter = 3
 
     def run(self):
         self.client_init()
@@ -33,6 +35,7 @@ class UDP_client(threading.Thread):
         self.SERVER_HOST = input("Please enter the server IP")
         try:
             self.s = self.s.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            self.s.settimeout()
         except socket.error:
             print("Failed to create socket")
             sys.exit()
@@ -90,33 +93,52 @@ class UDP_client(threading.Thread):
             return self.message_builder(choice)
 
     def send_message(self, msg=None):
-        while 1:
-
             # msg = self.send_helper()
-            if msg is None:
-                break
+        if msg is None:
+            reply = "Message is NONE"
+        
+        msg_json_cs = json.dumps(msg)
+        msg_encoded = msg_json_cs.encode()
 
-            msg_json_cs = json.dumps(msg)
-            msg_encoded = msg_json_cs.encode()
+        try:
+            print("UDP_client host: " + str(self.HOST))
+            print("UDP_client port: " + str(self.PORT))
+            
 
-            try:
-                print("UDP_client host: " + str(self.HOST))
-                print("UDP_client port: " + str(self.PORT))
-                self.s.sendto(msg_encoded, (self.SERVER_HOST, self.SERVER_PORT))
 
-                print("DATA SENT")
-                d = self.s.recvfrom(1024)
-                reply = d[0]
-                addr = d[1]
+            self.s.sendto(msg_encoded, (self.SERVER_HOST, self.SERVER_PORT))
 
-                # TODO: If not acknowledged, send it again
+            print("DATA SENT")
 
-                print("Server reply: " + reply.decode())
-                print("Server addr: " + str(addr[0]) + " " + str(addr[1]))
-                # TODO: json.loads reply as dict and pass to self.cs.parse_reply(reply)
-                # TODO: return self.cs.parse_reply(reply)
-            except socket.error as msg:
-                print("Error " + str(msg))
+
+            while(self.timeout_counter >= 0):
+                try: 
+                    d = self.s.recvfrom(1024)
+                    reply = d[0]
+                    addr = d[1]
+                    self.timeout_counter = 3
+                    break
+                except self.s.Timeouterror:
+                    self.timeout_counter = self.timeout_counter - 1
+                    print("Timed out - retrying...")
+            
+            if(self.timeout_counter == 0):
+                reply = "Time-out 3 times, server not responding."
+
+            # TODO: If not acknowledged, send it again
+
+            print("Server reply: " + reply.decode())
+            print("Server addr: " + str(addr[0]) + " " + str(addr[1]))
+
+            
+                
+            # TODO: json.loads reply as dict and pass to self.cs.parse_reply(reply)
+            # TODO: return self.cs.parse_reply(reply)
+        except socket.error as msg:
+            print("Error " + str(msg))
+        
+        print("UDP_CLIENT " + str(reply))
+        return reply
 
 # udp_client = UDP_client(8880)
 # udp_client.start()

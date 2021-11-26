@@ -4,6 +4,8 @@ from UDP_client import UDP_client
 from TCP_client import TCP_client
 import socket
 import tkinter as tk
+import UDP_message_helper
+import queue
 
 class OmegaClient:
     def __init__(self):
@@ -130,7 +132,9 @@ class OmegaClient:
     def register_button(self, event):
         if self.check_UDP():
             message = self.UDP_client.message_builder("1")
-            reply = self.UDP_client.send_message(message)
+            #reply = self.UDP_client.send_message(message)
+            reply = self.startThread(message)
+            print("REGISTER_BUTTON " + str(reply))
         else:
             reply = "Name and ports, buddy."
         self.set_status(reply)
@@ -139,7 +143,8 @@ class OmegaClient:
     def de_register_button(self, event):
         if self.check_UDP():
             message = self.UDP_client.message_builder("2")
-            reply = self.UDP_client.send_message(message)
+            # reply = self.UDP_client.send_message(message)
+            reply = self.startThread(message)
         else:
             reply = "Name and ports, buddy."
         self.set_status(reply)
@@ -152,7 +157,8 @@ class OmegaClient:
             user_input = user_input.split(',')
             user_input = [s.strip() for s in user_input]
             message = self.UDP_client.message_builder("3", user_input)
-            reply = self.UDP_client.send_message(message)
+            # reply = self.UDP_client.send_message(message)
+            reply = self.startThread(message)
         else:
             reply = "Name and ports, buddy."
         self.set_status(reply)
@@ -165,7 +171,8 @@ class OmegaClient:
             user_input = user_input.split(',')
             user_input = [s.strip() for s in user_input]
             message = self.UDP_client.message_builder("4", user_input)
-            reply = self.UDP_client.send_message(message)
+            # reply = self.UDP_client.send_message(message)
+            reply = self.startThread(message)
         else:
             reply = "Name and ports, buddy."
         self.set_status(reply)
@@ -175,7 +182,8 @@ class OmegaClient:
     def retrieve_all_button(self, event):
         if self.check_UDP():
             message = self.UDP_client.message_builder("5")
-            reply = self.UDP_client.send_message(message)
+            # reply = self.UDP_client.send_message(message)
+            reply = self.startThread(message)
         else:
             reply = "Name and ports, buddy."
         self.set_status(reply)
@@ -186,7 +194,8 @@ class OmegaClient:
         if self.check_UDP():
             user_input = self.tk_input_entry.get().strip()
             message = self.UDP_client.message_builder("6", user_input)
-            reply = self.UDP_client.send_message(message)
+            # reply = self.UDP_client.send_message(message)
+            reply = self.startThread(message)
         else:
             reply = "Name and ports, buddy."
         self.set_status(reply)
@@ -197,7 +206,8 @@ class OmegaClient:
         if self.check_UDP():
             user_input = self.tk_input_entry.get().strip()
             message = self.UDP_client.message_builder("7", user_input)
-            reply = self.UDP_client.send_message(message)
+            # reply = self.UDP_client.send_message(message)
+            reply = self.startThread(message)
         else:
             reply = "Name and ports, buddy."
         self.set_status(reply)
@@ -207,7 +217,8 @@ class OmegaClient:
     def update_contact_button(self, event):
         if self.check_UDP():
             message = self.UDP_client.message_builder("8")
-            reply = self.UDP_client.send_message(message)
+            # reply = self.UDP_client.send_message(message)
+            reply = self.startThread(message)
         else:
             reply = "Name and ports, buddy."
         self.set_status(reply)
@@ -233,3 +244,10 @@ class OmegaClient:
 
     def init_TCP(self):
         pass
+
+    def startThread(self, message):
+        que = queue.Queue()
+        client = UDP_message_helper.UDP_message_helper(message, que)
+        client.start()
+        reply = que.get()
+        return reply
