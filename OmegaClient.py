@@ -1,4 +1,6 @@
 import traceback
+import TCP_acceptingConnection
+import TCP_message_helper
 
 from UDP_client import UDP_client
 from TCP_client import TCP_client
@@ -133,6 +135,7 @@ class OmegaClient:
             except Exception as e:
                 traceback.print_exc()
                 self.tk_status['text'] = f"Error: {e} ; Please enter valid port values."
+            self.startTCP_acceptingThread()
 
     def register_button(self, event):
         if self.check_UDP():
@@ -243,6 +246,12 @@ class OmegaClient:
         pass
 
     def download_button(self, event):
+        if self.check_UDP():
+            user_input = self.tk_input_entry.get()
+            if user_input == "" or user_input is None:
+                reply = "User input must be name of file."
+            reply = self.startTCP_receivingThread(user_input)
+        self.set_status(reply)
         print("download")
         pass
 
@@ -268,3 +277,14 @@ class OmegaClient:
         client.start()
         reply = que.get()
         return reply
+
+    def startTCP_receivingThread(self, input):
+        que = queue.Queue()
+        client = TCP_message_helper.TCP_message_helper(self.TCP_client, input, que)
+        client.start()
+        reply = que.get()
+        return reply
+
+    def startTCP_acceptingThread(self):
+        conn = TCP_acceptingConnection.TCP_acceptingConnection(self.TCP_client)
+        conn.start()

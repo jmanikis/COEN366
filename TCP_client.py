@@ -18,10 +18,12 @@ class TCP_client:
         self.TCP = (self.HOST, self.LISTENING_PORT)
         self.cs = ClientSide(self.name, self.HOST, self.UDP, self.TCP)
 
-    def run(self):
+    def start(self):
         self.createSocket()
         self.bindSocket()
         self.acceptingConnection()
+        
+        # self.acceptingConnection()
 
     # ------------------------TCP-------------------------------
     #      PEER COMMUNICATION - Acting Server Side
@@ -50,6 +52,8 @@ class TCP_client:
             print("Socket binding error: " + str(msg) + "\n" + "Retrying....")
             self.bindSocket()
 
+
+
     # Establish connections with another Client (Socket must be listening)
     def acceptingConnection(self):
         while True:
@@ -57,8 +61,10 @@ class TCP_client:
                 print("waiting for connection")
                 conn, address = self.socket.accept()
 
+
                 # Prevent timeout from happening
                 self.socket.setblocking(1)
+
 
                 print("Connection has been established with IP: " + address[0] + " | Port : " + str(address[1]))
                 request = conn.recv(1024)
@@ -88,14 +94,15 @@ class TCP_client:
     # ------------------------TCP-------------------------------
     #       PEER COMMUNICATION - Acting Client Side
     # ----------------------------------------------------------
-    def receivingClient(self):
+    def receivingClient(self, file):
         rSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        file_name = input("Please enter the name of the requested file: ")
+        file_name = file
         try:
             client = self.cs.get_client_from_file_name(file_name)
             print(f"Client: {client} \n")
             if client is not None:
                 rSocket.connect((client['ip'], client['tcp_socket']))
+                # rSocket.connect(('localhost', client['tcp_socket']))
                 print(f"Connected to : {client['tcp_socket']}")
 
                 request_dict = self.cs.DOWNLOAD(file_name)
@@ -114,12 +121,13 @@ class TCP_client:
                         break
 
                 print(data)
-
+                return "File downloaded."
             else:
                 print("No Clients Have The Requested File.")
         except:
             traceback.print_exc()
             print("Error Retrieving Client")
+
 
 if __name__ == '__main__':
     client1 = TCP_client()

@@ -1,17 +1,12 @@
 import socket
 import sys
-import threading
 import json
 from ClientSide import ClientSide
-import select
 
 
-class UDP_client(threading.Thread):
+class UDP_client():
     def __init__(self, name, UDP_port, TCP_port, host, server_host, server_port):
-        super(UDP_client, self).__init__()
         self.s = socket
-        # self.HOSTNAME = self.s.gethostname()
-        # self.HOST = self.s.gethostbyname(self.HOSTNAME)
         self.HOST = host
         self.PORT = UDP_port
         self.SERVER_HOST = server_host
@@ -27,12 +22,6 @@ class UDP_client(threading.Thread):
 
         self.client_init()
         self.bind_socket()
-
-    def run(self):
-        self.client_init()
-        self.bind_socket()
-        self.client_side_init()
-        self.send_message()
 
     def client_init(self):
         try:
@@ -75,7 +64,7 @@ class UDP_client(threading.Thread):
         elif choice == '6':
             return self.cs.SEARCH_FILE(arg)
         elif choice == '7':
-            return self.cs.RETRIEVE_INFOT(arg)
+            return self.cs.RETRIEVE_INFOT
         elif choice == '8':
             return self.cs.UPDATE_CONTACT()
         elif choice == 'q':
@@ -124,11 +113,8 @@ class UDP_client(threading.Thread):
                 print("Server addr: " + str(addr[0]) + " " + str(addr[1]))
                 reply = json.loads(reply.decode())
                 self.cs.parse_reply(reply)
-                
 
             # TODO: If not acknowledged, send it again
-            # TODO: json.loads reply as dict and pass to self.cs.parse_reply(reply)
-            # TODO: return self.cs.parse_reply(reply)
         except socket.error as msg:
             print("Error " + str(msg))
     
