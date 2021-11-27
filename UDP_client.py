@@ -1,23 +1,24 @@
 import socket
 import sys
 import json
+import traceback
+
 from ClientSide import ClientSide
 
 
-class UDP_client():
-    def __init__(self, name, UDP_port, TCP_port, host, server_host, server_port):
+class UDP_client:
+    def __init__(self, client_side, server_host, server_port):
+        self.cs = client_side
         self.s = socket
-        self.HOST = host
-        self.PORT = UDP_port
+        self.HOST = self.cs.ip
+        self.PORT = self.cs.udp_socket
         self.SERVER_HOST = server_host
         self.SERVER_PORT = server_port
-        self.currentRQ = 0
-        self.nextRQ = 1
         self.ip = self.HOST
-        self.tcp = TCP_port
+        self.tcp = self.cs.tcp_socket
         self.udp = self.PORT
-        self.name = name
-        self.cs = ClientSide(self.name, self.HOST, self.udp, self.tcp)
+        self.name = self.cs.name
+
         self.timeout_counter = 3
 
         self.client_init()
@@ -116,7 +117,9 @@ class UDP_client():
 
             # TODO: If not acknowledged, send it again
         except socket.error as msg:
-            print("Error " + str(msg))
+            traceback.print_exc()
+            reply = str(msg)
+            print("Error: " + str(msg))
     
         return reply
 

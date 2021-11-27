@@ -14,42 +14,44 @@ class ClientSide:
         self.tcp_socket = tcp
         self.CDBH = CDBHelper()
         self.files = files
-        self.RQ = None
         self.SEARCH_FILE_name = None
+        # RQ
+        self.pending_rq = []
+        self.RQ = 0
 
     # Use: request_dict = cs_obj.REGISTER() to get a dict to send to server.
     def REGISTER(self):
         return self.generate_request(
-            "REGISTER", self.RQ, name=self.name, ip=self.ip, udp_socket=self.udp_socket, tcp_socket=self.tcp_socket)
+            "REGISTER",   ip=self.ip, udp_socket=self.udp_socket, tcp_socket=self.tcp_socket)
 
     # Use: request_dict = cs_obj.DE_REGISTER() to get a dict to send to server.
     def DE_REGISTER(self):
-        return self.generate_request("DE-REGISTER", self.RQ, name=self.name)
+        return self.generate_request("DE-REGISTER")
 
     # Use: request_dict = cs_obj.PUBLISH(file_list) to get a dict to send to server.
     def PUBLISH(self, files=None):
         if files is None:
             files = self.files
-        return self.generate_request("PUBLISH", self.RQ, name=self.name, files=files)
+        return self.generate_request("PUBLISH", files=files)
 
     # Use: request_dict = cs_obj.REMOVE(files_list) to get a dict to send to server.
     def REMOVE(self, files):
         if not type(files) == list:
             files = [files]
-        return self.generate_request("REMOVE", self.RQ, name=self.name, files=files)
+        return self.generate_request("REMOVE", files=files)
 
     # Use: request_dict = cs_obj.RETRIEVE_ALL() to get a dict to send to server.
     def RETRIEVE_ALL(self):
-        return self.generate_request("RETRIEVE-ALL", self.RQ, name=self.name)
+        return self.generate_request("RETRIEVE-ALL")
 
     # Use: request_dict = cs_obj.SEARCH_FILE(file_name_str) to get a dict to send to server.
     def SEARCH_FILE(self, file_name):
         self.SEARCH_FILE_name = file_name
-        return self.generate_request("SEARCH-FILE", self.RQ, name=self.name, file_name=file_name)
+        return self.generate_request("SEARCH-FILE", file_name=file_name)
 
     # Use: request_dict = cs_obj.RETRIEVE_INFOT(client_name_str) to get a dict to send to server.
     def RETRIEVE_INFOT(self, client_name):
-        return self.generate_request("RETRIEVE-INFOT", self.RQ, name=self.name, client_name=client_name)
+        return self.generate_request("RETRIEVE-INFOT", client_name=client_name)
 
     # Use: request_dict = cs_obj.UPDATE_CONTACT() to get a dict to send to server.
     # Note: Can optionally pass params to func for update
@@ -66,16 +68,10 @@ class ClientSide:
             tcp_socket = self.tcp_socket
         else:
             self.tcp_socket = tcp_socket
-        return self.generate_request(
-            "UPDATE-CONTACT",
-            self.RQ,
-            name=self.name,
-            ip=ip,
-            udp_socket=udp_socket,
-            tcp_socket=tcp_socket)
+        return self.generate_request("UPDATE-CONTACT", ip=ip, udp_socket=udp_socket, tcp_socket=tcp_socket)
 
     def DOWNLOAD(self, file_name):
-        return self.generate_request("DOWNLOAD", self.RQ, file_name=file_name)
+        return self.generate_request("DOWNLOAD",  file_name=file_name)
         pass
 
     def FILE(self, RQ, file_name, chunks):
@@ -98,13 +94,24 @@ class ClientSide:
     def get_client_from_file_name(self, file_name):
         return self.CDBH.get_client_from_file_name(file_name)
 
-    def generate_request(self, header, RQ, **kwargs):
-        reply = {'header': header, 'RQ': RQ}
+    def generate_request(self, header, **kwargs):
+        RQ = self.RQ
+        existing_request = next((req for req in self.pending_rq if req['header'] == header), None)
+        if existing_request is not None:
+            RQ = existing_request['RQ']
+        else:
+            self.RQ += 1
+        reply = {'header': header, 'RQ': RQ, 'name': self.name}
         reply.update(kwargs)
+        if header != "DE-REGISTER":
+            self.pending_rq.append(reply)
         return reply
 
     def parse_reply(self, dict_in):
+        if dict_in is None:
+            return None
         header = dict_in['header']
+        self.handle_rq(dict_in)
         try:
             assert type(header) == str
         except Exception as e:
@@ -155,5 +162,10 @@ class ClientSide:
             chunk_number = dict_in['chunk_number']
             text = dict_in['text']
             self.CDBH.FILE_END(RQ, file_name, chunk_number, text)
-        else:
-            pass
+
+    def handle_rq(self, dict_in):
+        RQ = dict_in['RQ']
+        existing_request = next((req for req in self.pending_rq if req['RQ'] == RQ), None)
+        print(f"PENDING: {self.pending_rq}")
+        if existing_request is not None:
+            self.pending_rq.remove(existing_request)

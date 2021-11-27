@@ -1,13 +1,14 @@
 import traceback
 import TCP_acceptingConnection
 import TCP_message_helper
-
+from ClientSide import ClientSide
 from UDP_client import UDP_client
 from TCP_client import TCP_client
 import socket
 import tkinter as tk
 import UDP_message_helper
 import queue
+from asyncio import Lock
 
 
 class OmegaClient:
@@ -18,9 +19,12 @@ class OmegaClient:
         self.TCP_port = 9091
         self.TCP_client = None
         self.UDP_client = None
-        self.server_host = "192.168.211.1"
-        self.server_port = 8891
+        self.server_host = None
+        self.server_port = None
         self.name = None
+        self.client_side = None
+        # Synchronization
+        self.cmd_lock = Lock()
         # GUI
         self.status = "Waiting for initial settings."
         self.window = tk.Tk()
@@ -33,19 +37,25 @@ class OmegaClient:
         self.status_frame = tk.Frame(master=self.window)
         self.commands_frame = tk.Frame(master=self.window)
         self.input_frame = tk.Frame(master=self.window)
+        self.server_frame = tk.Frame(master=self.window)
         # Labels
         self.tk_name = tk.Label(text="Client Name: ", master=self.name_frame)
-        self.tk_tcp = tk.Label(text="TCP port: ", master=self.TCP_frame)
-        self.tk_udp = tk.Label(text="UDP Port: ", master=self.UDP_frame)
-        self.tk_ip = tk.Label(text=f"IP: {self.HOST}", master=self.ip_frame)
+        self.tk_tcp = tk.Label(text="Client TCP port: ", master=self.TCP_frame)
+        self.tk_udp = tk.Label(text="Client UDP Port: ", master=self.UDP_frame)
+        self.tk_ip = tk.Label(text=f"Client IP: {self.HOST}", master=self.ip_frame)
+        self.tk_server_connection = tk.Label(
+            text=f"Server connection: {self.server_host}:{self.server_port}", master=self.ip_frame, wraplength=150)
         self.tk_commands = tk.Label(text="Commands List", master=self.commands_frame)
-        self.tk_status = tk.Label(text="Awaiting user input: Client Name, UDP and TCP ports", master=self.status_frame, wraplength=300, justify="left")
-        self.tk_input = tk.Label(text="User Input:", master=self.input_frame)
+        self.tk_status = tk.Label(text="Awaiting user input: Client Name, UDP and TCP ports", master=self.status_frame,
+                                  wraplength=300, justify="left")
+        self.tk_input = tk.Label(text="Command Input:", master=self.input_frame)
+        self.tk_server_settings = tk.Label(text="Server IP:Port", master=self.server_frame)
         # Text Entries
         self.tk_name_entry = tk.Entry(master=self.name_frame)
         self.tk_TCP_entry = tk.Entry(master=self.TCP_frame)
         self.tk_UDP_entry = tk.Entry(master=self.UDP_frame)
         self.tk_input_entry = tk.Entry(master=self.input_frame)
+        self.tk_server_entry = tk.Entry(master=self.server_frame)
         # Buttons
         self.tk_save_button = tk.Button(text="Save", master=self.save_frame, width=40)
         self.tk_register_button = tk.Button(text="REGISTER", master=self.commands_frame, width=20)
@@ -65,14 +75,18 @@ class OmegaClient:
         self.tk_name.pack()
         self.tk_save_button.pack()
         self.tk_name_entry.pack()
+        self.tk_name_entry.insert(0, "Sample Client")
         # TCP frame
         self.tk_tcp.pack()
         self.tk_TCP_entry.pack()
+        self.tk_TCP_entry.insert(0, "9001")
         # UDP frame
         self.tk_udp.pack()
         self.tk_UDP_entry.pack()
+        self.tk_UDP_entry.insert(0, "9002")
         # IP frame
         self.tk_ip.pack()
+        self.tk_server_connection.pack()
         # Status frame
         self.tk_status.pack()
         # Commands frame
@@ -89,15 +103,20 @@ class OmegaClient:
         # Input frame
         self.tk_input.pack()
         self.tk_input_entry.pack()
+        # Server frame
+        self.tk_server_settings.pack()
+        self.tk_server_entry.pack()
+        self.tk_server_entry.insert(0, ":8891")
         # Frames
         self.name_frame.grid(row=0, column=0)
         self.UDP_frame.grid(row=1, column=0)
         self.TCP_frame.grid(row=1, column=1)
-        self.ip_frame.grid(row=0, column=1)
-        self.save_frame.grid(row=2, column=0, columnspan=2, sticky=tk.E+tk.W)
-        self.commands_frame.grid(row=3, column=0)
-        self.input_frame.grid(row=3, column=1)
-        self.status_frame.grid(row=4, column=0, columnspan=2, sticky=tk.E+tk.W)
+        self.server_frame.grid(row=0, column=1)
+        self.save_frame.grid(row=2, column=0, columnspan=2, sticky=tk.E + tk.W)
+        self.ip_frame.grid(row=3, column=1)
+        self.commands_frame.grid(row=3, column=0, rowspan=2, sticky=tk.N + tk.S)
+        self.input_frame.grid(row=4, column=1)
+        self.status_frame.grid(row=5, column=0, columnspan=2, sticky=tk.E + tk.W)
         # bind buttons
         self.tk_save_button.bind("<Button-1>", self.save_button)
         self.tk_register_button.bind("<Button-1>", self.register_button)
@@ -112,35 +131,44 @@ class OmegaClient:
         self.tk_name.mainloop()
 
     def save_button(self, event):
-        self.name = self.tk_name_entry.get()
-        if self.name == "" or self.name is None:
-            self.set_status("Name can't be blank.")
-        self.tk_name['text'] = f"Client name: {self.name}"
-        self.UDP_port = self.tk_UDP_entry.get()
-        self.tk_udp['text'] = f"UDP port: {self.UDP_port}"
-        self.TCP_port = self.tk_TCP_entry.get()
-        self.tk_tcp['text'] = f"TCP port: {self.TCP_port}"
-        if len(self.UDP_port) > 5 or len(self.TCP_port) > 5:
-            self.set_status("Please enter valid port values.")
-        else:
-            try:
+        try:
+            self.name = self.tk_name_entry.get()
+            self.tk_name['text'] = f"Client name: {self.name}"
+            self.UDP_port = self.tk_UDP_entry.get()
+            self.tk_udp['text'] = f"Client UDP port: {self.UDP_port}"
+            self.TCP_port = self.tk_TCP_entry.get()
+            self.tk_tcp['text'] = f"Client TCP port: {self.TCP_port}"
+            ip_port = self.tk_server_entry.get().split(':')
+            if len(ip_port) != 2:
+                raise Exception("Invalid Server IP:Port")
+            self.server_host = ip_port[0]
+            self.server_port = int(ip_port[1])
+            if self.name == "":
+                self.set_status("Name can't be blank.")
+            if len(self.UDP_port) > 5 or len(self.TCP_port) > 5:
+                self.set_status("Please enter valid port values.")
+            elif self.UDP_port == "" or self.TCP_port == "":
+                self.set_status("Please enter valid port values.")
+            elif self.TCP_port == self.UDP_port:
+                raise Exception("Ports cannot be the same.")
+            else:
+                self.tk_server_connection['text'] = f"Server connection: {self.server_host}:{self.server_port}"
                 self.TCP_port = int(self.TCP_port)
                 self.UDP_port = int(self.UDP_port)
-                self.TCP_client = TCP_client(
-                    self.name, self.UDP_port, self.TCP_port, self.HOST, self.server_host, self.server_port)
-                self.UDP_client = UDP_client(
-                    self.name, self.UDP_port, self.TCP_port, self.HOST, self.server_host, self.server_port)
+                self.client_side = ClientSide(self.name, self.HOST, self.UDP_port, self.TCP_port)
+                self.TCP_client = TCP_client(self.client_side)
+                self.UDP_client = UDP_client(self.client_side, self.server_host, self.server_port)
                 if self.TCP_client is not None and self.UDP_client is not None:
                     self.set_status("Awaiting command.")
-            except Exception as e:
-                traceback.print_exc()
-                self.tk_status['text'] = f"Error: {e} ; Please enter valid port values."
-            self.startTCP_acceptingThread()
+                    self.startTCP_acceptingThread()
+        except Exception as e:
+            traceback.print_exc()
+            self.set_status(f"Error: {e}")
 
     def register_button(self, event):
         if self.check_UDP():
             message = self.UDP_client.message_builder("1")
-            #reply = self.UDP_client.send_message(message)
+            # reply = self.UDP_client.send_message(message)
             reply = self.startThread(message)
             print("REGISTER_BUTTON " + str(reply))
         else:
@@ -260,7 +288,7 @@ class OmegaClient:
             return True
         else:
             return False
-        
+
     def set_status(self, status):
         self.tk_status['text'] = status
 
