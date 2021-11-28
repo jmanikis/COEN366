@@ -103,7 +103,7 @@ class TCP_client:
                         print(f"Connected to : {client['tcp_socket']}")
                         break
                     except:
-                        print(f"Cannot connect to client, moving on to next client {n}")
+                        print(f"Cannot connect to client, moving on to next client {client}")
                         continue
 
                 request_dict = self.cs.DOWNLOAD(file_name)
