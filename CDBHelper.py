@@ -104,11 +104,11 @@ class CDBHelper:
         if len(file) == 0:
             return None
         else:
-            clients = file[0]['clients']
+            clients = file['clients']
             if len(clients) == 0:
                 return None
             else:
-                return clients[0]
+                return clients
 
     def does_client_exist(self, client):
         if type(client) != str:
