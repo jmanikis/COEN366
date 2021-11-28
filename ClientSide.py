@@ -150,9 +150,9 @@ class ClientSide:
             file_name = dict_in['file_name']
             check, reply = self.CDBH.DOWNLOAD(file_name)
             if check:
-                return self.FILE(RQ, file_name, reply)
+                return self.FILE(file_name, reply)
             else:
-                return self.DOWNLOAD_ERROR(RQ, reply)
+                return self.DOWNLOAD_ERROR(reply)
         elif header == "FILE":
             RQ = dict_in['RQ']
             file_name = dict_in['file_name']
