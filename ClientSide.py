@@ -1,6 +1,6 @@
 from Client import Client
 from CDBHelper import CDBHelper
-import random
+import uuid
 
 
 class ClientSide:
@@ -17,7 +17,7 @@ class ClientSide:
         self.SEARCH_FILE_name = None
         # RQ
         self.pending_rq = []
-        self.RQ = 0
+        self.RQ = str(uuid.uuid4())
 
     # Use: request_dict = cs_obj.REGISTER() to get a dict to send to server.
     def REGISTER(self):
@@ -74,36 +74,39 @@ class ClientSide:
         return self.generate_request("DOWNLOAD",  file_name=file_name)
         pass
 
-    def FILE(self, RQ, file_name, chunks):
+    def FILE(self, file_name, chunks):
         requests = []
         for chunk in chunks[:-1]:
             chunk_number = chunk[0]
             text = chunk[1]
-            request = self.generate_request("FILE", RQ, file_name=file_name, chunk_number=chunk_number, text=text)
+            request = self.generate_request("FILE", file_name=file_name, chunk_number=chunk_number, text=text)
             requests.append(request)
         last_chunk = chunks[-1][0]
         last_text = chunks[-1][1]
         last_request = self.generate_request(
-            "FILE-END", RQ, file_name=file_name, chunk_number=last_chunk, text=last_text)
+            "FILE-END", file_name=file_name, chunk_number=last_chunk, text=last_text)
         requests.append(last_request)
         return requests
 
-    def DOWNLOAD_ERROR(self, RQ, message):
-        return self.generate_request("DOWNLOAD-ERROR", RQ, reason=message)
+    def DOWNLOAD_ERROR(self, message):
+        return self.generate_request("DOWNLOAD-ERROR", reason=message)
 
     def get_client_from_file_name(self, file_name):
         return self.CDBH.get_client_from_file_name(file_name)
 
     def generate_request(self, header, **kwargs):
+        new_rq = True
         RQ = self.RQ
+        print(f"PENDING: {self.pending_rq}")
         existing_request = next((req for req in self.pending_rq if req['header'] == header), None)
         if existing_request is not None:
             RQ = existing_request['RQ']
+            new_rq = False
         else:
-            self.RQ += 1
+            self.RQ = str(uuid.uuid4())
         reply = {'header': header, 'RQ': RQ, 'name': self.name}
         reply.update(kwargs)
-        if header != "DE-REGISTER":
+        if header != "DE-REGISTER" and new_rq:
             self.pending_rq.append(reply)
         return reply
 
@@ -169,3 +172,4 @@ class ClientSide:
         print(f"PENDING: {self.pending_rq}")
         if existing_request is not None:
             self.pending_rq.remove(existing_request)
+            print(f"PENDING: {self.pending_rq}")

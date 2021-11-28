@@ -15,8 +15,8 @@ class OmegaClient:
     def __init__(self):
         self.HOSTNAME = socket.gethostname()
         self.HOST = socket.gethostbyname(self.HOSTNAME)
-        self.UDP_port = 9001
-        self.TCP_port = 9091
+        self.UDP_port = None
+        self.TCP_port = None
         self.TCP_client = None
         self.UDP_client = None
         self.server_host = None
@@ -133,11 +133,8 @@ class OmegaClient:
     def save_button(self, event):
         try:
             self.name = self.tk_name_entry.get()
-            self.tk_name['text'] = f"Client name: {self.name}"
-            self.UDP_port = self.tk_UDP_entry.get()
-            self.tk_udp['text'] = f"Client UDP port: {self.UDP_port}"
             self.TCP_port = self.tk_TCP_entry.get()
-            self.tk_tcp['text'] = f"Client TCP port: {self.TCP_port}"
+            self.UDP_port = self.tk_UDP_entry.get()
             ip_port = self.tk_server_entry.get().split(':')
             if len(ip_port) != 2:
                 raise Exception("Invalid Server IP:Port")
@@ -161,6 +158,9 @@ class OmegaClient:
                 if self.TCP_client is not None and self.UDP_client is not None:
                     self.set_status("Awaiting command.")
                     self.startTCP_acceptingThread()
+            self.tk_name['text'] = f"Client name: {self.name}"
+            self.tk_udp['text'] = f"Client UDP port: {self.UDP_port}"
+            self.tk_tcp['text'] = f"Client TCP port: {self.TCP_port}"
         except Exception as e:
             traceback.print_exc()
             self.set_status(f"Error: {e}")

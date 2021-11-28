@@ -18,6 +18,9 @@ class TCP_client:
         self.UDP = self.cs.udp_socket  # hardcoded
         self.TCP = (self.HOST, self.LISTENING_PORT)
 
+    def __del__(self):
+        pass
+
     def start(self):
         self.createSocket()
         self.bindSocket()
@@ -42,6 +45,7 @@ class TCP_client:
             print("Binding the port: " + str(self.LISTENING_PORT))
 
             # bind socket
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.socket.bind(("", self.LISTENING_PORT))
 
             # listen for connections (max 1 bad connections before throwing error)
