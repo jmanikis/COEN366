@@ -16,6 +16,7 @@ class TCP_client:
         self.TCP = (self.HOST, self.LISTENING_PORT)
 
     def __del__(self):
+        self.socket.close()
         pass
 
     def start(self):
@@ -95,11 +96,11 @@ class TCP_client:
             clientList = self.cs.get_client_from_file_name(file_name)
             print(f"Client: {clientList} \n")
             if clientList is not None:
-                for n in clientList:
+                for client in clientList:
                     try:
-                        rSocket.connect((clientList[n]['ip'], clientList[n]['tcp_socket']))
+                        rSocket.connect((client['ip'], client['tcp_socket']))
                         # rSocket.connect(('localhost', client['tcp_socket']))
-                        print(f"Connected to : {clientList[n]['tcp_socket']}")
+                        print(f"Connected to : {client['tcp_socket']}")
                         break
                     except:
                         print(f"Cannot connect to client, moving on to next client {n}")
@@ -125,5 +126,3 @@ class TCP_client:
         except:
             traceback.print_exc()
             print("Error Retrieving Client")
-
-
