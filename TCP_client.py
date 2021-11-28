@@ -16,6 +16,7 @@ class TCP_client:
         self.TCP = (self.HOST, self.LISTENING_PORT)
 
     def __del__(self):
+        self.socket.close()
         pass
 
     def start(self):
@@ -125,5 +126,3 @@ class TCP_client:
         except:
             traceback.print_exc()
             print("Error Retrieving Client")
-
-
