@@ -96,10 +96,14 @@ class TCP_client:
             print(f"Client: {clientList} \n")
             if clientList is not None:
                 for n in clientList:
-                    rSocket.connect((clientList[n]['ip'], clientList[n]['tcp_socket']))
-                    # rSocket.connect(('localhost', client['tcp_socket']))
-                    print(f"Connected to : {clientList[n]['tcp_socket']}")
-                    break
+                    try:
+                        rSocket.connect((clientList[n]['ip'], clientList[n]['tcp_socket']))
+                        # rSocket.connect(('localhost', client['tcp_socket']))
+                        print(f"Connected to : {clientList[n]['tcp_socket']}")
+                        break
+                    except:
+                        print("Cannot connect to client, moving on to next client")
+                        continue
 
                 request_dict = self.cs.DOWNLOAD(file_name)
                 print(f"Request_dict: {request_dict} \n")
