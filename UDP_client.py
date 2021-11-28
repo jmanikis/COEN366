@@ -27,6 +27,7 @@ class UDP_client:
     def client_init(self):
         try:
             self.s = self.s.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.s.settimeout(5)
         except socket.error:
             print("Failed to create socket")
