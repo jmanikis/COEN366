@@ -10,11 +10,8 @@ class TCP_client:
         self.cs = client_side
         self.name = self.cs.name
         self.socket = None
-        # self.HOSTNAME = socket.gethostname()  # current IP
-        # self.HOST = socket.gethostbyname(self.HOSTNAME)
         self.HOST = self.cs.ip
         self.LISTENING_PORT = self.cs.tcp_socket  # {port}
-        # get from server (should be randomly generated, hardcoded for now)
         self.UDP = self.cs.udp_socket  # hardcoded
         self.TCP = (self.HOST, self.LISTENING_PORT)
 
@@ -25,8 +22,6 @@ class TCP_client:
         self.createSocket()
         self.bindSocket()
         self.acceptingConnection()
-        
-        # self.acceptingConnection()
 
     # ------------------------TCP-------------------------------
     #      PEER COMMUNICATION - Acting Server Side
@@ -41,7 +36,6 @@ class TCP_client:
     # Binding the Socket and listening for connections
     def bindSocket(self):
         try:
-
             print("Binding the port: " + str(self.LISTENING_PORT))
 
             # bind socket
@@ -56,8 +50,6 @@ class TCP_client:
             print("Socket binding error: " + str(msg) + "\n" + "Retrying....")
             self.bindSocket()
 
-
-
     # Establish connections with another Client (Socket must be listening)
     def acceptingConnection(self):
         while True:
@@ -65,10 +57,8 @@ class TCP_client:
                 print("waiting for connection")
                 conn, address = self.socket.accept()
 
-
                 # Prevent timeout from happening
                 self.socket.setblocking(1)
-
 
                 print("Connection has been established with IP: " + address[0] + " | Port : " + str(address[1]))
                 request = conn.recv(1024)
@@ -102,12 +92,14 @@ class TCP_client:
         rSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         file_name = file
         try:
-            client = self.cs.get_client_from_file_name(file_name)
-            print(f"Client: {client} \n")
-            if client is not None:
-                rSocket.connect((client['ip'], client['tcp_socket']))
-                # rSocket.connect(('localhost', client['tcp_socket']))
-                print(f"Connected to : {client['tcp_socket']}")
+            clientList = self.cs.get_client_from_file_name(file_name)
+            print(f"Client: {clientList} \n")
+            if clientList is not None:
+                for n in clientList:
+                    rSocket.connect((clientList[n]['ip'], clientList[n]['tcp_socket']))
+                    # rSocket.connect(('localhost', client['tcp_socket']))
+                    print(f"Connected to : {clientList[n]['tcp_socket']}")
+                    break
 
                 request_dict = self.cs.DOWNLOAD(file_name)
                 print(f"Request_dict: {request_dict} \n")
@@ -123,8 +115,6 @@ class TCP_client:
                     self.cs.parse_reply(data)  # Send json to database and loop to get all dictionaries to database.
                     if data['header'] == "FILE-END":
                         break
-
-                print(data)
                 return "File downloaded."
             else:
                 print("No Clients Have The Requested File.")
@@ -133,6 +123,3 @@ class TCP_client:
             print("Error Retrieving Client")
 
 
-if __name__ == '__main__':
-    client1 = TCP_client()
-    client1.run()
