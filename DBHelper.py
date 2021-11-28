@@ -11,6 +11,7 @@ class DBHelper:
         self.query = Query()
         self.db = TinyDB("server.json")
         self.clients_table = self.db.table("clients")
+        self.rq_table = self.db.table("rq")
 
     # Registration
     def REGISTER(self, client):
@@ -189,3 +190,50 @@ class DBHelper:
             traceback.print_exc()
         finally:
             return files_list
+
+    def save_rq(self, dict_in):
+        try:
+            RQ = dict_in['RQ']
+            name = dict_in['name']
+            existing_client = self.rq_table.search(self.query.name == name)
+            if len(existing_client) == 1:
+                existing_client = existing_client[0]
+                rqs = existing_client['rqs']
+                for item in rqs:
+                    if RQ in item:
+                        if item[RQ]:
+                            return True
+                        else:
+                            return False
+                return False
+            elif len(existing_client) == 0:
+                self.rq_table.insert({'name': name, 'rqs': [{RQ: False}]})
+            else:
+                pass
+        except Exception as e:
+            traceback.print_exc()
+            print(e)
+
+    def set_rq(self, dict_in):
+        try:
+            RQ = dict_in['RQ']
+            name = dict_in['name']
+            existing_client = self.rq_table.search(self.query.name == name)
+            if len(existing_client) == 1:
+                existing_client = existing_client[0]
+                rqs = existing_client['rqs']
+                to_update = None
+                for item in reversed(rqs):
+                    if RQ in item:
+                        to_update = item
+                        break
+                if to_update is not None:
+                    rqs.remove(to_update)
+                    rqs.append({RQ: True})
+                    self.rq_table.update({'rqs': rqs}, self.query.name == name)
+                else:
+                    raise Exception("Somehow completed a RQ without it being in this list?")
+        except Exception as e:
+            traceback.print_exc()
+            print(e)
+

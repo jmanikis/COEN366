@@ -20,6 +20,7 @@ class ServerSide:
     def get_reply(self, dict_in):
         self.dict_in = dict_in
         header = self.dict_in['header']
+        self.DBH.save_rq(dict_in)
         try:
             assert type(header) == str
             if header == "REGISTER":
