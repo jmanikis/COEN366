@@ -173,6 +173,7 @@ class OmegaClient:
 
     def register_button(self, event):
         if self.check_UDP():
+            self.set_status("Registering...")
             message = self.UDP_client.message_builder("1")
             # reply = self.UDP_client.send_message(message)
             reply = self.startThread(message)
@@ -184,6 +185,7 @@ class OmegaClient:
 
     def de_register_button(self, event):
         if self.check_UDP():
+            self.set_status("De-registering...")
             message = self.UDP_client.message_builder("2")
             # reply = self.UDP_client.send_message(message)
             reply = self.startThread(message)
@@ -195,6 +197,7 @@ class OmegaClient:
 
     def publish_button(self, event):
         if self.check_UDP():
+            self.set_status("Publishing...")
             user_input = self.tk_input_entry.get()
             if user_input == "" or user_input is None:
                 reply = "User input must be name of file(s)."
@@ -212,6 +215,7 @@ class OmegaClient:
 
     def remove_button(self, event):
         if self.check_UDP():
+            self.set_status("Removing...")
             user_input = self.tk_input_entry.get()
             if user_input == "" or user_input is None:
                 reply = "User input must be name of file(s)."
@@ -229,6 +233,7 @@ class OmegaClient:
 
     def retrieve_all_button(self, event):
         if self.check_UDP():
+            self.set_status("Retrieving All...")
             message = self.UDP_client.message_builder("5")
             # reply = self.UDP_client.send_message(message)
             reply = self.startThread(message)
@@ -240,6 +245,7 @@ class OmegaClient:
 
     def search_file_button(self, event):
         if self.check_UDP():
+            self.set_status("Searching File...")
             user_input = self.tk_input_entry.get().strip()
             if user_input == "" or user_input is None:
                 reply = "User input must be name of a file."
@@ -255,6 +261,7 @@ class OmegaClient:
 
     def retrieve_infot_button(self, event):
         if self.check_UDP():
+            self.set_status("Retrieving Info...")
             user_input = self.tk_input_entry.get().strip()
             if user_input == "" or user_input is None:
                 reply = "User input must be name of a client."
@@ -270,6 +277,7 @@ class OmegaClient:
 
     def update_contact_button(self, event):
         if self.check_UDP():
+            self.set_status("Updating Contact...")
             message = self.UDP_client.message_builder("8")
             # reply = self.UDP_client.send_message(message)
             reply = self.startThread(message)
@@ -281,6 +289,7 @@ class OmegaClient:
 
     def download_button(self, event):
         if self.check_UDP():
+            self.set_status("Downloading...")
             user_input = self.tk_input_entry.get()
             if user_input == "" or user_input is None:
                 reply = "User input must be name of file."

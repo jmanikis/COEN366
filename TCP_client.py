@@ -97,6 +97,8 @@ class TCP_client:
             print(f"Client: {clientList} \n")
             if clientList is not None:
                 for client in clientList:
+                    if client['name'] == self.name:
+                        continue
                     try:
                         rSocket.connect((client['ip'], client['tcp_socket']))
                         # rSocket.connect(('localhost', client['tcp_socket']))
@@ -120,9 +122,9 @@ class TCP_client:
                     self.cs.parse_reply(data)  # Send json to database and loop to get all dictionaries to database.
                     if data['header'] == "FILE-END":
                         break
-                return "File downloaded."
+                return f"File \"{file_name}\" downloaded."
             else:
-                print("No Clients Have The Requested File.")
+                return "No Clients Have The Requested File."
         except:
             traceback.print_exc()
-            print("Error Retrieving Client")
+            return "Error Retrieving Client"

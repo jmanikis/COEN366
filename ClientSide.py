@@ -89,7 +89,7 @@ class ClientSide:
         return requests
 
     def DOWNLOAD_ERROR(self, message):
-        return self.generate_request("DOWNLOAD-ERROR", reason=message)
+        return [self.generate_request("DOWNLOAD-ERROR", reason=message)]
 
     def get_client_from_file_name(self, file_name):
         return self.CDBH.get_client_from_file_name(file_name)
