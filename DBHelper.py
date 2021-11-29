@@ -193,6 +193,7 @@ class DBHelper:
 
     def save_rq(self, dict_in):
         try:
+            print(f"SAVE_RQ_1: {self.rq_table.all()}")
             RQ = dict_in['RQ']
             name = dict_in['name']
             existing_client = self.rq_table.search(self.query.name == name)
@@ -205,17 +206,20 @@ class DBHelper:
                             return True
                         else:
                             return False
-                return False
+                rqs.append({RQ: False})
+                self.rq_table.update({'rqs': rqs}, self.query.name == name)
             elif len(existing_client) == 0:
                 self.rq_table.insert({'name': name, 'rqs': [{RQ: False}]})
             else:
                 pass
+            print(f"SAVE_RQ_2: {self.rq_table.all()}")
         except Exception as e:
             traceback.print_exc()
             print(e)
 
     def set_rq(self, dict_in):
         try:
+            print(f"SET_RQ_1: {self.rq_table.all()}")
             RQ = dict_in['RQ']
             name = dict_in['name']
             existing_client = self.rq_table.search(self.query.name == name)
@@ -228,11 +232,15 @@ class DBHelper:
                         to_update = item
                         break
                 if to_update is not None:
+                    print(f"to_update: {to_update}")
                     rqs.remove(to_update)
                     rqs.append({RQ: True})
                     self.rq_table.update({'rqs': rqs}, self.query.name == name)
                 else:
                     raise Exception("Somehow completed a RQ without it being in this list?")
+            else:
+                raise Exception("Somehow processed a request from a non-registered user?")
+            print(f"SET_RQ_2: {self.rq_table.all()}")
         except Exception as e:
             traceback.print_exc()
             print(e)

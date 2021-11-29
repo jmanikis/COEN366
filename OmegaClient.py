@@ -1,3 +1,4 @@
+import ast
 import traceback
 import TCP_acceptingConnection
 import TCP_message_helper
@@ -38,6 +39,7 @@ class OmegaClient:
         self.commands_frame = tk.Frame(master=self.window)
         self.input_frame = tk.Frame(master=self.window)
         self.server_frame = tk.Frame(master=self.window)
+        self.info_frame = tk.Frame(master=self.window)
         # Labels
         self.tk_name = tk.Label(text="Client Name: ", master=self.name_frame)
         self.tk_tcp = tk.Label(text="Client TCP port: ", master=self.TCP_frame)
@@ -46,10 +48,11 @@ class OmegaClient:
         self.tk_server_connection = tk.Label(
             text=f"Server connection: {self.server_host}:{self.server_port}", master=self.ip_frame, wraplength=150)
         self.tk_commands = tk.Label(text="Commands List", master=self.commands_frame)
-        self.tk_status = tk.Label(text="Awaiting user input: Client Name, UDP and TCP ports", master=self.status_frame,
+        self.tk_status = tk.Label(text="Awaiting user input: Client Name, UDP and TCP ports, server info.", master=self.status_frame,
                                   wraplength=300, justify="left")
         self.tk_input = tk.Label(text="Command Input:", master=self.input_frame)
         self.tk_server_settings = tk.Label(text="Server IP:Port", master=self.server_frame)
+        self.tk_info = tk.Label(text="", master=self.info_frame, wraplength=300, justify="left")
         # Text Entries
         self.tk_name_entry = tk.Entry(master=self.name_frame)
         self.tk_TCP_entry = tk.Entry(master=self.TCP_frame)
@@ -106,7 +109,9 @@ class OmegaClient:
         # Server frame
         self.tk_server_settings.pack()
         self.tk_server_entry.pack()
-        self.tk_server_entry.insert(0, ":8891")
+        self.tk_server_entry.insert(0, f":8891")
+        # Info frame
+        self.tk_info.pack()
         # Frames
         self.name_frame.grid(row=0, column=0)
         self.UDP_frame.grid(row=1, column=0)
@@ -117,6 +122,7 @@ class OmegaClient:
         self.commands_frame.grid(row=3, column=0, rowspan=2, sticky=tk.N + tk.S)
         self.input_frame.grid(row=4, column=1)
         self.status_frame.grid(row=5, column=0, columnspan=2, sticky=tk.E + tk.W)
+        self.info_frame.grid(row=0, column=2, rowspan=5, sticky=tk.N + tk.S)
         # bind buttons
         self.tk_save_button.bind("<Button-1>", self.save_button)
         self.tk_register_button.bind("<Button-1>", self.register_button)
@@ -291,6 +297,10 @@ class OmegaClient:
 
     def set_status(self, status):
         self.tk_status['text'] = status
+        info_str = ""
+        if type(status) == dict:
+            info_str = self.unpack_dict(status, info_str)
+        self.tk_info['text'] = info_str
 
     def init_UDP(self):
         return UDP_client(self.name, self.UDP_port, self.TCP_port, self.HOST, self.server_host, self.server_port)
@@ -316,3 +326,27 @@ class OmegaClient:
     def startTCP_acceptingThread(self):
         conn = TCP_acceptingConnection.TCP_acceptingConnection(self.TCP_client)
         conn.start()
+
+    def unpack_dict(self, dict_in, in_str, depth=0):
+        out_str = in_str
+        if type(dict_in) == list:
+            if len(dict_in) == 0:
+                return out_str
+            for item in dict_in:
+                out_str = self.unpack_dict(item, out_str, depth+1)
+                if "---" not in out_str[-5:]:
+                    if ".txt" in out_str[-5:]:
+                        out_str += ", "
+                    else:
+                        out_str += "\n---"
+        elif type(dict_in) == dict:
+            for item in dict_in.keys():
+                indent = ""
+                if depth > 0:
+                    indent = '  '*(depth-1)+'↳'
+                out_str += f"\n{indent}{item}: "
+                out_str = self.unpack_dict(dict_in[item], out_str, depth+1)
+        else:
+            out_str += f"{dict_in}"
+        return out_str
+

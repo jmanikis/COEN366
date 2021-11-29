@@ -15,12 +15,13 @@ class ServerSide:
         self.dict_in = None
         self.DBH = DBHelper()
         self.reply = None
-        self.pending_rq = []
 
     def get_reply(self, dict_in):
         self.dict_in = dict_in
         header = self.dict_in['header']
-        self.DBH.save_rq(dict_in)
+        duplicate_rq = self.DBH.save_rq(dict_in)
+        if duplicate_rq:
+            return None
         try:
             assert type(header) == str
             if header == "REGISTER":
@@ -43,6 +44,7 @@ class ServerSide:
             else:
                 raise Exception(f"Invalid header: {header}")
             self.reply = reply
+            self.DBH.set_rq(dict_in)
             return reply
         except Exception as e:
             print(f"Exception in ServerSide.get_reply: {e}")
