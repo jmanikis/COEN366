@@ -71,8 +71,3 @@ class UDP_server(threading.Thread):
             sys.exit()
 
         print ('Socket bind complete')
-
-
-udp_server = UDP_server(8891)
-udp_server.start()
-udp_server.join()

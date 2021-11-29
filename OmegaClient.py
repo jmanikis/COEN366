@@ -1,5 +1,10 @@
 import ast
+import os
+import string
 import traceback
+import random
+from pathlib import Path
+
 import TCP_acceptingConnection
 import TCP_message_helper
 from ClientSide import ClientSide
@@ -10,6 +15,7 @@ import tkinter as tk
 import UDP_message_helper
 import queue
 from asyncio import Lock
+from server import UDP_server
 
 
 class OmegaClient:
@@ -24,6 +30,7 @@ class OmegaClient:
         self.server_port = None
         self.name = None
         self.client_side = None
+        self.server = None
         # Synchronization
         self.cmd_lock = Lock()
         # GUI
@@ -40,6 +47,8 @@ class OmegaClient:
         self.input_frame = tk.Frame(master=self.window)
         self.server_frame = tk.Frame(master=self.window)
         self.info_frame = tk.Frame(master=self.window)
+        self.presets_frame = tk.Frame(master=self.window)
+        self.files_frame = tk.Frame(master=self.window)
         # Labels
         self.tk_name = tk.Label(text="Client Name: ", master=self.name_frame)
         self.tk_tcp = tk.Label(text="Client TCP port: ", master=self.TCP_frame)
@@ -48,11 +57,16 @@ class OmegaClient:
         self.tk_server_connection = tk.Label(
             text=f"Server connection: {self.server_host}:{self.server_port}", master=self.ip_frame, wraplength=150)
         self.tk_commands = tk.Label(text="Commands List", master=self.commands_frame)
-        self.tk_status = tk.Label(text="Awaiting user input: Client Name, UDP and TCP ports, server info.", master=self.status_frame,
+        self.tk_status = tk.Label(text="", master=self.status_frame,
                                   wraplength=300, justify="left")
         self.tk_input = tk.Label(text="Command Input:", master=self.input_frame)
         self.tk_server_settings = tk.Label(text="Server IP:Port", master=self.server_frame)
         self.tk_info = tk.Label(text="", master=self.info_frame, wraplength=300, justify="left")
+        self.tk_presets_1 = tk.Label(text="'Start Server' will cause the window to not respond. Closing it will close the server.",
+                                     master=self.presets_frame, wraplength=100, justify="left")
+        self.tk_presets_2 = tk.Label(text="Client 1-6 will autofill the fields with a sample client. Press save to confirm.",
+                                     master=self.presets_frame, wraplength=100, justify="left")
+        self.tk_files = tk.Label(text="", master=self.files_frame, wraplength=100, justify="left")
         # Text Entries
         self.tk_name_entry = tk.Entry(master=self.name_frame)
         self.tk_TCP_entry = tk.Entry(master=self.TCP_frame)
@@ -70,6 +84,15 @@ class OmegaClient:
         self.tk_retrieve_infot_button = tk.Button(text="RETRIEVE INFO", master=self.commands_frame, width=20)
         self.tk_update_contact_button = tk.Button(text="UPDATE CONTACT", master=self.commands_frame, width=20)
         self.tk_download_button = tk.Button(text="DOWNLOAD", master=self.commands_frame, width=20)
+        self.tk_start_server_button = tk.Button(text="Start Server", master=self.presets_frame, width=10)
+        self.tk_client1_button = tk.Button(text="Client 1", master=self.presets_frame, width=10)
+        self.tk_client2_button = tk.Button(text="Client 2", master=self.presets_frame, width=10)
+        self.tk_client3_button = tk.Button(text="Client 3", master=self.presets_frame, width=10)
+        self.tk_client4_button = tk.Button(text="Client 4", master=self.presets_frame, width=10)
+        self.tk_client5_button = tk.Button(text="Client 5", master=self.presets_frame, width=10)
+        self.tk_client6_button = tk.Button(text="Client 6", master=self.presets_frame, width=10)
+        self.tk_random_file_button = tk.Button(text="Random File", master=self.files_frame, width=10)
+        self.tk_open_folder_button = tk.Button(text="Files Folder", master=self.files_frame, width=10)
         self.init_GUI()
 
     def init_GUI(self):
@@ -78,15 +101,12 @@ class OmegaClient:
         self.tk_name.pack()
         self.tk_save_button.pack()
         self.tk_name_entry.pack()
-        self.tk_name_entry.insert(0, "Sample Client")
         # TCP frame
         self.tk_tcp.pack()
         self.tk_TCP_entry.pack()
-        self.tk_TCP_entry.insert(0, "9001")
         # UDP frame
         self.tk_udp.pack()
         self.tk_UDP_entry.pack()
-        self.tk_UDP_entry.insert(0, "9002")
         # IP frame
         self.tk_ip.pack()
         self.tk_server_connection.pack()
@@ -112,6 +132,20 @@ class OmegaClient:
         self.tk_server_entry.insert(0, f":8891")
         # Info frame
         self.tk_info.pack()
+        # Preset frame
+        self.tk_presets_1.pack()
+        self.tk_start_server_button.pack()
+        self.tk_presets_2.pack()
+        self.tk_client1_button.pack()
+        self.tk_client2_button.pack()
+        self.tk_client3_button.pack()
+        self.tk_client4_button.pack()
+        self.tk_client5_button.pack()
+        self.tk_client6_button.pack()
+        # Files frame
+        self.tk_files.pack()
+        self.tk_random_file_button.pack()
+        self.tk_open_folder_button.pack()
         # Frames
         self.name_frame.grid(row=0, column=0)
         self.UDP_frame.grid(row=1, column=0)
@@ -122,7 +156,9 @@ class OmegaClient:
         self.commands_frame.grid(row=3, column=0, rowspan=2, sticky=tk.N + tk.S)
         self.input_frame.grid(row=4, column=1)
         self.status_frame.grid(row=5, column=0, columnspan=2, sticky=tk.E + tk.W)
-        self.info_frame.grid(row=0, column=2, rowspan=5, sticky=tk.N + tk.S)
+        self.info_frame.grid(row=0, column=3, rowspan=5)
+        self.presets_frame.grid(row=0, column=2, rowspan=5, sticky=tk.N + tk.S)
+        self.files_frame.grid(row=5, column=2, rowspan=2, sticky=tk.N + tk.S)
         # bind buttons
         self.tk_save_button.bind("<Button-1>", self.save_button)
         self.tk_register_button.bind("<Button-1>", self.register_button)
@@ -134,6 +170,18 @@ class OmegaClient:
         self.tk_retrieve_infot_button.bind("<Button-1>", self.retrieve_infot_button)
         self.tk_update_contact_button.bind("<Button-1>", self.update_contact_button)
         self.tk_download_button.bind("<Button-1>", self.download_button)
+        self.tk_start_server_button.bind("<Button-1>", self.start_server_button)
+        self.tk_client1_button.bind("<Button-1>", self.client1_button)
+        self.tk_client2_button.bind("<Button-1>", self.client2_button)
+        self.tk_client3_button.bind("<Button-1>", self.client3_button)
+        self.tk_client4_button.bind("<Button-1>", self.client4_button)
+        self.tk_client5_button.bind("<Button-1>", self.client5_button)
+        self.tk_client6_button.bind("<Button-1>", self.client6_button)
+        self.tk_random_file_button.bind("<Button 1>", self.random_file_button)
+        self.tk_open_folder_button.bind("<Button 1>", self.open_folder_button)
+        # Start GUI
+        self.get_files()
+        self.set_status("Awaiting user input: Client Name, UDP and TCP ports, server info.")
         self.tk_name.mainloop()
 
     def save_button(self, event):
@@ -298,6 +346,79 @@ class OmegaClient:
         print("download")
         pass
 
+    def start_server_button(self, event):
+        self.set_status("This widow will be unresponsive while acting as a server. Do not close it.")
+        self.server = UDP_server(8891)
+        self.server.start()
+        self.server.join()
+
+    def client1_button(self, event):
+        self.tk_name_entry.delete(0, tk.END)
+        self.tk_name_entry.insert(0, "Sample Client 1")
+        self.tk_TCP_entry.delete(0, tk.END)
+        self.tk_TCP_entry.insert(0, "9091")
+        self.tk_UDP_entry.delete(0, tk.END)
+        self.tk_UDP_entry.insert(0, "9092")
+
+    def client2_button(self, event):
+        self.tk_name_entry.delete(0, tk.END)
+        self.tk_name_entry.insert(0, "Sample Client 2")
+        self.tk_TCP_entry.delete(0, tk.END)
+        self.tk_TCP_entry.insert(0, "9093")
+        self.tk_UDP_entry.delete(0, tk.END)
+        self.tk_UDP_entry.insert(0, "9094")
+
+    def client3_button(self, event):
+        self.tk_name_entry.delete(0, tk.END)
+        self.tk_name_entry.insert(0, "Sample Client 3")
+        self.tk_TCP_entry.delete(0, tk.END)
+        self.tk_TCP_entry.insert(0, "9095")
+        self.tk_UDP_entry.delete(0, tk.END)
+        self.tk_UDP_entry.insert(0, "9096")
+
+    def client4_button(self, event):
+        self.tk_name_entry.delete(0, tk.END)
+        self.tk_name_entry.insert(0, "Sample Client 4")
+        self.tk_TCP_entry.delete(0, tk.END)
+        self.tk_TCP_entry.insert(0, "9097")
+        self.tk_UDP_entry.delete(0, tk.END)
+        self.tk_UDP_entry.insert(0, "9098")
+
+    def client5_button(self, event):
+        self.tk_name_entry.delete(0, tk.END)
+        self.tk_name_entry.insert(0, "Sample Client 5")
+        self.tk_TCP_entry.delete(0, tk.END)
+        self.tk_TCP_entry.insert(0, "9099")
+        self.tk_UDP_entry.delete(0, tk.END)
+        self.tk_UDP_entry.insert(0, "9100")
+
+    def client6_button(self, event):
+        self.tk_name_entry.delete(0, tk.END)
+        self.tk_name_entry.insert(0, "Sample Client 6")
+        self.tk_TCP_entry.delete(0, tk.END)
+        self.tk_TCP_entry.insert(0, "9101")
+        self.tk_UDP_entry.delete(0, tk.END)
+        self.tk_UDP_entry.insert(0, "9102")
+
+    def random_file_button(self, event):
+        file_name = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(3)])
+        file_name += ".txt"
+        file_path = Path(f"./files/{file_name}")
+        lower_bound = random.randint(0, 100)
+        upper_bound = random.randint(200, 300)
+        if file_path.is_file():
+            os.remove(file_path)
+        with open(file_path, "a") as file:
+            file_contents = ""
+            for i in range(lower_bound, upper_bound):
+                file_contents += f"{i} "
+            file.write(file_contents)
+        self.get_files()
+        self.set_status(f"Generated file \"{file_name}\" in ./files.\nSelect \"Open Folder\" to view.")
+
+    def open_folder_button(self, event):
+        os.startfile("files")
+
     def check_UDP(self):
         if self.UDP_client is not None:
             return True
@@ -305,7 +426,7 @@ class OmegaClient:
             return False
 
     def set_status(self, status):
-        self.tk_status['text'] = status
+        self.tk_status['text'] = f"Status: {status}"
         info_str = ""
         if type(status) == dict:
             info_str = self.unpack_dict(status, info_str)
@@ -358,4 +479,8 @@ class OmegaClient:
         else:
             out_str += f"{dict_in}"
         return out_str
+
+    def get_files(self):
+        files = os.listdir("./files")
+        self.tk_files['text'] = f"Files in ./files: {files}"
 
