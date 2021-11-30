@@ -21,6 +21,7 @@ class CDBHelper:
         self.files_table = self.db.table("files")
         self.download_table = self.db.table("downloads")
         self.path = Path(".\\files")
+        self.file_chunks = []
 
     #   RETRIEVE -          Insert values into the db.json file.
     def RETRIEVE(self, data):
@@ -86,6 +87,9 @@ class CDBHelper:
     def FILE(self, RQ, file_name, chunk_number, text):
         chunk = {"RQ": RQ, "file_name": file_name, "chunk_number": chunk_number, "text": text}
         self.download_table.insert(chunk)
+        proto_dict = {'header': "FILE"}
+        proto_dict.update(chunk)
+        self.file_chunks.append(proto_dict)
 
     #   FILE_END -          Receive the last chunk and append all file  
     #                       chunks together, by sorting them according to 
@@ -107,8 +111,13 @@ class CDBHelper:
             with open(file_path, "a") as file:
                 for chunk in chunk_list:
                     file.write(chunk[1])
-
+            proto_dict = {'header': "FILE-END"}
+            proto_dict.update(last_chunk)
             self.download_table.remove(self.query.fragment(file_key))
+            file_chunks = []+self.file_chunks
+            file_chunks.append(proto_dict)
+            self.file_chunks = []
+            return file_chunks
         except Exception as e:
             traceback.print_exc()
             print(e)

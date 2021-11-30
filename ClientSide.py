@@ -174,7 +174,7 @@ class ClientSide:
             file_name = dict_in['file_name']
             chunk_number = dict_in['chunk_number']
             text = dict_in['text']
-            self.CDBH.FILE_END(RQ, file_name, chunk_number, text)
+            return self.CDBH.FILE_END(RQ, file_name, chunk_number, text)
 
     #   Check if the RQ exists in the list of RQ and increment if acknowledged by the server
     def handle_rq(self, dict_in):

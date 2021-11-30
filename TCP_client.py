@@ -121,10 +121,10 @@ class TCP_client:
                 while True:
                     received = rSocket.recv(1024)
                     data = json.loads(received)
-                    self.cs.parse_reply(data)  # Send json to database and loop to get all dictionaries to database.
+                    file_dicts = self.cs.parse_reply(data)  # Send json to database and loop to get all dictionaries to database.
                     if data['header'] == "FILE-END":
                         break
-                return f"File \"{file_name}\" downloaded."
+                return f"File \"{file_name}\" downloaded. {file_dicts}"
             else:
                 return "No Clients Have The Requested File."
         except:
