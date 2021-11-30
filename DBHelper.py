@@ -5,6 +5,10 @@ from tinydb import Query
 from Client import Client
 from File import File
 
+#   Means to handle commands on the server side 
+#   DBHelper interacts with the server.json file, where
+#   all the data is manipulated and checked
+#
 
 class DBHelper:
     def __init__(self):
@@ -13,7 +17,8 @@ class DBHelper:
         self.clients_table = self.db.table("clients")
         self.rq_table = self.db.table("rq")
 
-    # Registration
+    #   Registration of the client by checking if client exists and 
+    #   adding them to the server.json file
     def REGISTER(self, client):
         try:
             if self.does_client_exist(client) is None:
@@ -26,6 +31,8 @@ class DBHelper:
             print(e)
             return False, "Database error."
 
+    #   De-register the client by checking if the client exists in the server.json
+    #   and remove them.
     def DE_REGISTER(self, client):
         try:
             if self.does_client_exist(client) is None:
@@ -43,7 +50,7 @@ class DBHelper:
             print(e)
             return False
 
-    # File Related
+    #   Publish a file with a client name
     def PUBLISH(self, client_name, files):
         try:
             existing_client = self.does_client_exist(client_name)
@@ -64,6 +71,8 @@ class DBHelper:
             return False, "Database Error"
         pass
 
+
+    #   Remove a file from the server.json file
     def REMOVE(self, client, files):
         try:
             existing_client = self.does_client_exist(client)
@@ -87,7 +96,6 @@ class DBHelper:
             return False, "Database error."
 
     # Retrieving Information
-
     def RETRIEVE_ALL(self):
         list_of_everything = {}
         try:
@@ -105,6 +113,7 @@ class DBHelper:
             traceback.print_exc()
             return False, "Database error."
 
+    #   Search for a file in the server.json file.
     def SEARCH_FILE(self, name):
         client_list = []
         try:
@@ -118,6 +127,7 @@ class DBHelper:
             traceback.print_exc()
             return False, "Database error."
 
+    #   Retrieve info about a client that is currently registered to the server
     def RETRIEVE_INFOT(self, name):
         try:
             existing_client = self.does_client_exist(name)
@@ -131,6 +141,8 @@ class DBHelper:
             traceback.print_exc()
             return False, "Database error."
 
+    #   Update the contact information for a registered client, given 
+    #   their TCP port and files
     def UPDATE_CONTACT(self, client, replace_files=False):
         existing_client = self.does_client_exist(client)
         try:
@@ -166,7 +178,8 @@ class DBHelper:
             return found_client
         else:
             return None
-
+            
+    #   Return a dictionary of all files contained in the server.json file
     def get_file_dict(self):
         files_list = []
         files_dict = {}
@@ -191,6 +204,7 @@ class DBHelper:
         finally:
             return files_list
 
+    #   Save the RQ number of a request in the RQ table
     def save_rq(self, dict_in):
         try:
             print(f"SAVE_RQ_1: {self.rq_table.all()}")
@@ -217,6 +231,7 @@ class DBHelper:
             traceback.print_exc()
             print(e)
 
+    #   Update the RQ numbers in the RQ table
     def set_rq(self, dict_in):
         try:
             print(f"SET_RQ_1: {self.rq_table.all()}")
@@ -244,4 +259,3 @@ class DBHelper:
         except Exception as e:
             traceback.print_exc()
             print(e)
-

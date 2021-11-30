@@ -1,3 +1,7 @@
+#   Used in ServerSide.py to generate client objects
+#   and populate requests with appropriate content
+#   for command verification and execution
+
 class Client(dict):
     def __init__(self, name, ip, tcp_socket, udp_socket=None, files=None, RQ=None):
         super().__init__()
@@ -10,6 +14,7 @@ class Client(dict):
         self['tcp_socket'] = tcp_socket
         self['files'] = files
 
+#   Return a dicionary containing the client's name, ip and tcp socket'
     def get_client_connection(self):
         my_dict = {'name': self['name'],
                    'ip': self['ip'],
@@ -17,11 +22,13 @@ class Client(dict):
                    }
         return my_dict
 
+#   Return a dictionary containing client files
     def get_client_data(self):
         my_dict = self.get_client_connection()
         my_dict['files'] = self['files']
         return my_dict
 
+#   Return a client object containing values from dictionary input
     @classmethod
     def from_dict(cls, my_dict):
         params = ['name', 'ip', 'tcp_socket']

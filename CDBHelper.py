@@ -6,6 +6,11 @@ from Client import Client
 from pathlib import Path
 import os
 
+#   CDBHelper used parse the reply from the server
+#   and populate the db.json local file with its 
+#   contents.
+
+
 
 class CDBHelper:
 
@@ -17,6 +22,7 @@ class CDBHelper:
         self.download_table = self.db.table("downloads")
         self.path = Path(".\\files")
 
+    #   RETRIEVE -          Insert values into the db.json file.
     def RETRIEVE(self, data):
         try:
             self.clients_table.truncate()
@@ -30,6 +36,7 @@ class CDBHelper:
         except Exception as e:
             print(e)
 
+    #   SEARCH-FILE -       Search for a file inside the db.json file.
     def SEARCH_FILE(self, file_name, data):
         try:
             assert type(data) == list
@@ -37,6 +44,7 @@ class CDBHelper:
         except Exception as e:
             print(e)
 
+    #   RETRIEVE-INFOT -    Retrieve info about a client 
     def RETRIEVE_INFOT(self, name, ip, tcp_socket, files):
         try:
             existing_client = self.does_client_exist(name)
@@ -48,6 +56,9 @@ class CDBHelper:
             traceback.print_exc()
             print(e)
 
+    #   DOWNLOAD -          Initiate a TCP connection with another client
+    #                       and request a file transfer
+    #                       The file is sent in 200 byte sized chunks  
     def DOWNLOAD(self, file_name):
         try:
             if not self.path.is_dir():
@@ -71,10 +82,14 @@ class CDBHelper:
             print(e)
             return False, "Download error."
 
+    #   FILE -              Insert a chunk inside the download table
     def FILE(self, RQ, file_name, chunk_number, text):
         chunk = {"RQ": RQ, "file_name": file_name, "chunk_number": chunk_number, "text": text}
         self.download_table.insert(chunk)
 
+    #   FILE_END -          Receive the last chunk and append all file  
+    #                       chunks together, by sorting them according to 
+    #                       their file chunk numbers
     def FILE_END(self, RQ, file_name, chunk_number, text):
         try:
             last_chunk = {"RQ": RQ, "file_name": file_name, "chunk_number": chunk_number, "text": text}
@@ -86,7 +101,6 @@ class CDBHelper:
             for chunk in chunks:
                 chunk_list.append((chunk['chunk_number'], chunk['text']))
             chunk_list.sort(key=lambda x: x[0])
-            # file_path = Path(os.path.join(self.path, "received.txt"))
             file_path = Path(os.path.join(self.path, file_name))
             if file_path.is_file():
                 os.remove(file_path)
@@ -99,6 +113,7 @@ class CDBHelper:
             traceback.print_exc()
             print(e)
 
+    #   Get the client name of the file contained in db.json
     def get_client_from_file_name(self, file_name):
         file = self.files_table.search(self.query.name == file_name)
         if len(file) == 0:
@@ -110,6 +125,7 @@ class CDBHelper:
             else:
                 return clients
 
+    #   Check if a client exists in the db.json
     def does_client_exist(self, client):
         if type(client) != str:
             client = client['name']

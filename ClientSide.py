@@ -2,6 +2,8 @@ from Client import Client
 from CDBHelper import CDBHelper
 import uuid
 
+#   Provide means for a produce an appropriate dictioinary 
+#   for the command request that will be sent to the server
 
 class ClientSide:
 
@@ -70,10 +72,12 @@ class ClientSide:
             self.tcp_socket = tcp_socket
         return self.generate_request("UPDATE-CONTACT", ip=ip, udp_socket=udp_socket, tcp_socket=tcp_socket)
 
+    # Use: Initiate a download request
     def DOWNLOAD(self, file_name):
         return self.generate_request("DOWNLOAD",  file_name=file_name)
         pass
 
+    # Use: Generate file chunks for the corresponding file 
     def FILE(self, file_name, chunks):
         requests = []
         for chunk in chunks[:-1]:
@@ -88,12 +92,15 @@ class ClientSide:
         requests.append(last_request)
         return requests
 
+    #   Return an error if the download was not successful
     def DOWNLOAD_ERROR(self, message):
         return [self.generate_request("DOWNLOAD-ERROR", reason=message)]
 
+    #   Return a client name from a file
     def get_client_from_file_name(self, file_name):
         return self.CDBH.get_client_from_file_name(file_name)
 
+    #   Return a dictionary containing relevant fields to the request
     def generate_request(self, header, **kwargs):
         new_rq = True
         RQ = self.RQ
@@ -110,6 +117,9 @@ class ClientSide:
             self.pending_rq.append(reply)
         return reply
 
+    #   Parse an incoming reply from a client or server 
+    #   and return the appropriate header or client 
+    #   helper function
     def parse_reply(self, dict_in):
         if dict_in is None:
             return None
@@ -166,6 +176,7 @@ class ClientSide:
             text = dict_in['text']
             self.CDBH.FILE_END(RQ, file_name, chunk_number, text)
 
+    #   Check if the RQ exists in the list of RQ and increment if acknowledged by the server
     def handle_rq(self, dict_in):
         RQ = dict_in['RQ']
         existing_request = next((req for req in self.pending_rq if req['RQ'] == RQ), None)

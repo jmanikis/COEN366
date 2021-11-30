@@ -18,6 +18,16 @@ from asyncio import Lock
 from server import UDP_server
 
 
+
+#        The client GUI used to send commands to 
+#        the server.
+
+#           The server button can be used to start a server. 
+
+#        Provides end points for each command specified
+#        in the report.
+        
+
 class OmegaClient:
     def __init__(self):
         self.HOSTNAME = socket.gethostname()
@@ -184,16 +194,24 @@ class OmegaClient:
         self.set_status("Awaiting user input: Client Name, UDP and TCP ports, server info.")
         self.tk_name.mainloop()
 
+    
+    #   Save button allows the client to save the following values:
+    #   Client Name
+    #   Client UDP port 
+    #   Client TCP port 
+    #   Server IP 
+    #   Server UDP Port
+    #   Start TCP accepting thread to listen for download requests
     def save_button(self, event):
         try:
-            self.name = self.tk_name_entry.get()
-            self.TCP_port = self.tk_TCP_entry.get()
-            self.UDP_port = self.tk_UDP_entry.get()
-            ip_port = self.tk_server_entry.get().split(':')
+            self.name = self.tk_name_entry.get()                # Save Client name
+            self.TCP_port = self.tk_TCP_entry.get()             
+            self.UDP_port = self.tk_UDP_entry.get()             
+            ip_port = self.tk_server_entry.get().split(':')     
             if len(ip_port) != 2:
                 raise Exception("Invalid Server IP:Port")
-            self.server_host = ip_port[0]
-            self.server_port = int(ip_port[1])
+            self.server_host = ip_port[0]                       # Save Server IP
+            self.server_port = int(ip_port[1])                  # Save Server Port
             if self.name == "":
                 self.set_status("Name can't be blank.")
             if len(self.UDP_port) > 5 or len(self.TCP_port) > 5:
@@ -204,14 +222,14 @@ class OmegaClient:
                 raise Exception("Ports cannot be the same.")
             else:
                 self.tk_server_connection['text'] = f"Server connection: {self.server_host}:{self.server_port}"
-                self.TCP_port = int(self.TCP_port)
-                self.UDP_port = int(self.UDP_port)
+                self.TCP_port = int(self.TCP_port)             # Save Client TCP port
+                self.UDP_port = int(self.UDP_port)             # Save Client UDP port
                 self.client_side = ClientSide(self.name, self.HOST, self.UDP_port, self.TCP_port)
                 self.TCP_client = TCP_client(self.client_side)
                 self.UDP_client = UDP_client(self.client_side, self.server_host, self.server_port)
                 if self.TCP_client is not None and self.UDP_client is not None:
                     self.set_status("Awaiting command.")
-                    self.startTCP_acceptingThread()
+                    self.startTCP_acceptingThread()            # Start TCP accepting thread
             self.tk_name['text'] = f"Client name: {self.name}"
             self.tk_udp['text'] = f"Client UDP port: {self.UDP_port}"
             self.tk_tcp['text'] = f"Client TCP port: {self.TCP_port}"
@@ -219,23 +237,26 @@ class OmegaClient:
             traceback.print_exc()
             self.set_status(f"Error: {e}")
 
+
+    #   Starts a new thread to send "REGISTER" command to the server
+    #   Return the reply and set it's status
     def register_button(self, event):
         if self.check_UDP():
             self.set_status("Registering...")
             message = self.UDP_client.message_builder("1")
-            # reply = self.UDP_client.send_message(message)
-            reply = self.startThread(message)
+            reply = self.startThread(message)   
             print("REGISTER_BUTTON " + str(reply))
         else:
             reply = "Name and ports, buddy."
         self.set_status(reply)
         print("register")
 
+    #   Starts a new thread to send "DE-REGISTER" command to the server
+    #   Return the reply and set it's status
     def de_register_button(self, event):
         if self.check_UDP():
             self.set_status("De-registering...")
             message = self.UDP_client.message_builder("2")
-            # reply = self.UDP_client.send_message(message)
             reply = self.startThread(message)
         else:
             reply = "Name and ports, buddy."
@@ -243,6 +264,8 @@ class OmegaClient:
         print("deregister")
         pass
 
+    #   Starts a new thread to send "PUBLISH" command to the server
+    #   Return the reply and set it's status
     def publish_button(self, event):
         if self.check_UDP():
             self.set_status("Publishing...")
@@ -253,7 +276,6 @@ class OmegaClient:
                 user_input = user_input.split(',')
                 user_input = [s.strip() for s in user_input]
                 message = self.UDP_client.message_builder("3", user_input)
-                # reply = self.UDP_client.send_message(message)
                 reply = self.startThread(message)
         else:
             reply = "Name and ports, buddy."
@@ -261,6 +283,8 @@ class OmegaClient:
         print("publish")
         pass
 
+    #   Starts a new thread to send "REMOVE" command to the server
+    #   Return the reply and set it's status
     def remove_button(self, event):
         if self.check_UDP():
             self.set_status("Removing...")
@@ -271,7 +295,6 @@ class OmegaClient:
                 user_input = user_input.split(',')
                 user_input = [s.strip() for s in user_input]
                 message = self.UDP_client.message_builder("4", user_input)
-                # reply = self.UDP_client.send_message(message)
                 reply = self.startThread(message)
         else:
             reply = "Name and ports, buddy."
@@ -279,11 +302,12 @@ class OmegaClient:
         print("remove")
         pass
 
+    #   Starts a new thread to send "RETRIEVE-ALL" command to the server
+    #   Return the reply and set it's status
     def retrieve_all_button(self, event):
         if self.check_UDP():
             self.set_status("Retrieving All...")
             message = self.UDP_client.message_builder("5")
-            # reply = self.UDP_client.send_message(message)
             reply = self.startThread(message)
         else:
             reply = "Name and ports, buddy."
@@ -291,6 +315,8 @@ class OmegaClient:
         print("retrieve all")
         pass
 
+    #   Starts a new thread to send "SEARCH-FILE" command to the server
+    #   Return the reply and set it's status
     def search_file_button(self, event):
         if self.check_UDP():
             self.set_status("Searching File...")
@@ -299,7 +325,6 @@ class OmegaClient:
                 reply = "User input must be name of a file."
             else:
                 message = self.UDP_client.message_builder("6", user_input)
-                # reply = self.UDP_client.send_message(message)
                 reply = self.startThread(message)
         else:
             reply = "Name and ports, buddy."
@@ -307,6 +332,8 @@ class OmegaClient:
         print("search file")
         pass
 
+    #   Starts a new thread to send "RETRIEVE-INFOT" command to the server
+    #   Return the reply and set it's status
     def retrieve_infot_button(self, event):
         if self.check_UDP():
             self.set_status("Retrieving Info...")
@@ -315,7 +342,6 @@ class OmegaClient:
                 reply = "User input must be name of a client."
             else:
                 message = self.UDP_client.message_builder("7", user_input)
-                # reply = self.UDP_client.send_message(message)
                 reply = self.startThread(message)
         else:
             reply = "Name and ports, buddy."
@@ -323,11 +349,13 @@ class OmegaClient:
         print("retrieve info")
         pass
 
+
+    #   Starts a new thread to send "UPDATE-CONTACT" command to the server
+    #   Return the reply and set it's status
     def update_contact_button(self, event):
         if self.check_UDP():
             self.set_status("Updating Contact...")
             message = self.UDP_client.message_builder("8")
-            # reply = self.UDP_client.send_message(message)
             reply = self.startThread(message)
         else:
             reply = "Name and ports, buddy."
@@ -335,6 +363,8 @@ class OmegaClient:
         print("update contact")
         pass
 
+    #   Starts a new thread to send "DOWNLOAD" command to another client
+    #   Return the reply and set it's status
     def download_button(self, event):
         if self.check_UDP():
             self.set_status("Downloading...")
@@ -346,12 +376,14 @@ class OmegaClient:
         print("download")
         pass
 
+    #   Start a server with the UDP port 
     def start_server_button(self, event):
         self.set_status("This widow will be unresponsive while acting as a server. Do not close it.")
         self.server = UDP_server(8891)
         self.server.start()
         self.server.join()
 
+    #   Populate the fields with client preset ports
     def client1_button(self, event):
         self.tk_name_entry.delete(0, tk.END)
         self.tk_name_entry.insert(0, "Sample Client 1")
@@ -360,6 +392,7 @@ class OmegaClient:
         self.tk_UDP_entry.delete(0, tk.END)
         self.tk_UDP_entry.insert(0, "9092")
 
+    #   Populate the fields with client preset ports
     def client2_button(self, event):
         self.tk_name_entry.delete(0, tk.END)
         self.tk_name_entry.insert(0, "Sample Client 2")
@@ -368,6 +401,7 @@ class OmegaClient:
         self.tk_UDP_entry.delete(0, tk.END)
         self.tk_UDP_entry.insert(0, "9094")
 
+    #   Populate the fields with client preset ports
     def client3_button(self, event):
         self.tk_name_entry.delete(0, tk.END)
         self.tk_name_entry.insert(0, "Sample Client 3")
@@ -376,6 +410,7 @@ class OmegaClient:
         self.tk_UDP_entry.delete(0, tk.END)
         self.tk_UDP_entry.insert(0, "9096")
 
+    #   Populate the fields with client preset ports
     def client4_button(self, event):
         self.tk_name_entry.delete(0, tk.END)
         self.tk_name_entry.insert(0, "Sample Client 4")
@@ -384,6 +419,7 @@ class OmegaClient:
         self.tk_UDP_entry.delete(0, tk.END)
         self.tk_UDP_entry.insert(0, "9098")
 
+    #   Populate the fields with client preset ports
     def client5_button(self, event):
         self.tk_name_entry.delete(0, tk.END)
         self.tk_name_entry.insert(0, "Sample Client 5")
@@ -392,6 +428,7 @@ class OmegaClient:
         self.tk_UDP_entry.delete(0, tk.END)
         self.tk_UDP_entry.insert(0, "9100")
 
+    #   Populate the fields with client preset ports
     def client6_button(self, event):
         self.tk_name_entry.delete(0, tk.END)
         self.tk_name_entry.insert(0, "Sample Client 6")
@@ -400,6 +437,7 @@ class OmegaClient:
         self.tk_UDP_entry.delete(0, tk.END)
         self.tk_UDP_entry.insert(0, "9102")
 
+    #   Select a random file from the files folder on the computer
     def random_file_button(self, event):
         file_name = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(3)])
         file_name += ".txt"
@@ -416,15 +454,18 @@ class OmegaClient:
         self.get_files()
         self.set_status(f"Generated file \"{file_name}\" in ./files.\nSelect \"Open Folder\" to view.")
 
+    #   Open the directory where the files are contained
     def open_folder_button(self, event):
         os.startfile("files")
 
+    #   Check for empty UDP field
     def check_UDP(self):
         if self.UDP_client is not None:
             return True
         else:
             return False
 
+    #   Display the result of the request at the bottom of the GUI
     def set_status(self, status):
         self.tk_status['text'] = f"Status: {status}"
         info_str = ""
@@ -432,6 +473,7 @@ class OmegaClient:
             info_str = self.unpack_dict(status, info_str)
         self.tk_info['text'] = info_str
 
+    #   Initialize a UDP_client object containing saved fields
     def init_UDP(self):
         return UDP_client(self.name, self.UDP_port, self.TCP_port, self.HOST, self.server_host, self.server_port)
         pass
@@ -439,6 +481,8 @@ class OmegaClient:
     def init_TCP(self):
         pass
 
+    #   Start a new thread to send request to the server, 
+    #   and return the value from the reply
     def startThread(self, message):
         que = queue.Queue()
         client = UDP_message_helper.UDP_message_helper(self.UDP_client, message, que)
@@ -446,6 +490,7 @@ class OmegaClient:
         reply = que.get()
         return reply
 
+    #   Start a TCP listening - for download requests
     def startTCP_receivingThread(self, input):
         que = queue.Queue()
         client = TCP_message_helper.TCP_message_helper(self.TCP_client, input, que)
@@ -453,10 +498,12 @@ class OmegaClient:
         reply = que.get()
         return reply
 
+    #   Start an accepting thread to initialize the TCP connection
     def startTCP_acceptingThread(self):
         conn = TCP_acceptingConnection.TCP_acceptingConnection(self.TCP_client)
         conn.start()
 
+    #   Format the output of the dictionary from the reply
     def unpack_dict(self, dict_in, in_str, depth=0):
         out_str = in_str
         if type(dict_in) == list:
@@ -480,6 +527,7 @@ class OmegaClient:
             out_str += f"{dict_in}"
         return out_str
 
+    #   Return the files contained in the files directory
     def get_files(self):
         files = os.listdir("./files")
         self.tk_files['text'] = f"Files in ./files: {files}"
