@@ -1,9 +1,9 @@
-#import registered_users
 import socket
 import threading
 import sys
 import server_checkMessage
 
+#   UDP server runs and listens offloads requetss to new threads
 
 class UDP_server(threading.Thread):
     def __init__(self, port):

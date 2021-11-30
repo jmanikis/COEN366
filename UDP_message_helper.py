@@ -1,6 +1,9 @@
 import threading
 from UDP_client import UDP_client
 
+#   Offload a UDP message sending thread 
+#   called by OmegaClient when sending to the server
+
 class UDP_message_helper(threading.Thread):
     def __init__(self, udp_client, msg, q):
         super(UDP_message_helper, self).__init__()

@@ -1,5 +1,7 @@
 import threading
 
+#   Run a thread to start listening for TCP connection requests
+#   from other clients
 
 class TCP_acceptingConnection(threading.Thread):
     def __init__(self, tcp_client):

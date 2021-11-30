@@ -1,6 +1,8 @@
 import threading
 from TCP_client import TCP_client
 
+#   Initiate a TCP connection 
+
 class TCP_message_helper(threading.Thread):
     def __init__(self, tcp_client, input, q):
         super(TCP_message_helper, self).__init__()

@@ -16,6 +16,8 @@ class ServerSide:
         self.DBH = DBHelper()
         self.reply = None
 
+    #   Checking the headers of the reply and parse it accordingly by 
+    #   calling the appropriate defined function
     def get_reply(self, dict_in):
         self.dict_in = dict_in
         header = self.dict_in['header']
@@ -50,6 +52,8 @@ class ServerSide:
             print(f"Exception in ServerSide.get_reply: {e}")
             return {"header": "ERROR", "reason": str(e)}
 
+    #   Retrieve relevant information from dictionary reply and call 
+    #   DBHelper function REGISTER to register client to the database
     def REGISTER(self):
         dict_in = self.dict_in
         RQ = None
@@ -69,6 +73,8 @@ class ServerSide:
             print(f"Exception in ServerSide.REGISTER: {e}")
             return self.generate_reply("REGISTER-DENIED", RQ, reason=str(e))
 
+    #   Retrieve relevant information from dictionary reply and call 
+    #   DBHelper function RE-REGISTER to de-register client from the database
     def DE_REGISTER(self):
         try:
             dict_in = self.dict_in
@@ -79,6 +85,8 @@ class ServerSide:
         finally:
             return None
 
+    #   Retrieve relevant information from dictionary reply and call 
+    #   DBHelper function PUBLISH to publish a file to the database
     def PUBLISH(self):
         dict_in = self.dict_in
         RQ = None
@@ -97,6 +105,8 @@ class ServerSide:
             print(f"Exception in ServerSide.PUBLISH: {e}")
             return self.generate_reply("PUBLISH-DENIED", RQ, reason=str(e))
 
+    #   Retrieve relevant information from dictionary reply and call 
+    #   DBHelper function REMOVE to remove a file from the database
     def REMOVE(self):
         dict_in = self.dict_in
         RQ = None
@@ -115,6 +125,9 @@ class ServerSide:
             print(f"Exception in ServerSide.REMOVE: {e}")
             return self.generate_reply("REMOVE-DENIED", RQ, reason=str(e))
 
+
+    #   Retrieve relevant information from dictionary reply and call 
+    #   DBHelper function RETRIEVE-ALL to retrieve all clients and files from the database
     def RETRIEVE_ALL(self):
         dict_in = self.dict_in
         RQ = None
@@ -131,6 +144,8 @@ class ServerSide:
             print(f"Exception in ServerSide.RETRIEVE_ALL: {e}")
             return self.generate_reply("RETRIEVE-ERROR", RQ, reason=str(e))
 
+    #   Retrieve relevant information from dictionary reply and call 
+    #   DBHelper function SEARCH-FILE to search for a file on the database
     def SEARCH_FILE(self):
         dict_in = self.dict_in
         RQ = None
@@ -149,6 +164,8 @@ class ServerSide:
             traceback.print_exc()
             return self.generate_reply("SEARCH-ERROR", RQ, reason=str(e))
 
+    #   Retrieve relevant information from dictionary reply and call 
+    #   DBHelper function RETRIEVE-INFOT to retrieve information about a client
     def RETRIEVE_INFOT(self):
         dict_in = self.dict_in
         RQ = None
@@ -169,6 +186,9 @@ class ServerSide:
             print(f"Exception in ServerSide.RETRIEVE_INFOT: {e}")
             return self.generate_reply("RETRIEVE-ERROR", RQ, reason=str(e))
 
+
+    #   Retrieve relevant information from dictionary reply and call 
+    #   DBHelper function UPDATE-CONTACT to update the clients information on the server
     def UPDATE_CONTACT(self):
         dict_in = self.dict_in
         RQ = None
@@ -192,16 +212,8 @@ class ServerSide:
             print(f"Exception in ServerSide.UPDATE_CONTACT: {e}")
             return self.generate_reply("UPDATE-DENIED", RQ, name=name, reason=str(e))
 
+    #   Generate a reply given a header, RQ to pack args into dictionary
     def generate_reply(self, header, RQ, **kwargs):
         reply = {'header': header, 'RQ': RQ}
         reply.update(kwargs)
         return reply
-
-    def handle_rq(self, dict_in):
-        try:
-            RQ = dict_in['RQ']
-            name = dict_in['name']
-
-        except Exception as e:
-            traceback.print_exc()
-            print(e)

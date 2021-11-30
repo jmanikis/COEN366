@@ -3,6 +3,9 @@ import json
 from ServerSide import ServerSide
 import ast
 
+#   Server thread created from UDP_server class, used to 
+#   send message to ServerSide and retrieve reply after
+#   the command is executed
 
 class ServerCheckMessage(threading.Thread):
     def __init__(self, msg, addr, s):
@@ -18,11 +21,14 @@ class ServerCheckMessage(threading.Thread):
         print(msg_dict)
         print(type(msg_dict))
     
-        reply = self.serverSide.get_reply(msg_dict)
-        reply_json = json.dumps(reply)
+
+        reply = self.serverSide.get_reply(msg_dict)     #   Parse the message using ServerSide.get_reply()
+        reply_json = json.dumps(reply)                  #   Translate the reply to json format
 
         try:
-            self.s.sendto(reply_json.encode(), (self.server_host, self.server_port))
+            self.s.sendto(  reply_json.encode(),        #   Send the json back to the client
+                            (self.server_host, 
+                            self.server_port))     
  
         except self.s.error as msg:
             print('Error')

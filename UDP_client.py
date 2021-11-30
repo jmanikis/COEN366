@@ -5,6 +5,8 @@ import traceback
 
 from ClientSide import ClientSide
 
+#   Contains all UDP relevant functions for Client to Server
+#   communication. 
 
 class UDP_client:
     def __init__(self, client_side, server_host, server_port):

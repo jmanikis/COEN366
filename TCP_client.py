@@ -4,6 +4,8 @@ import traceback
 import time
 from ClientSide import ClientSide
 
+#   Contains all TCP relevant connection processes 
+#   for the client
 
 class TCP_client:
     def __init__(self, client_side):

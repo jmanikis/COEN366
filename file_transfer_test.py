@@ -1,6 +1,8 @@
 from ServerSide import ServerSide
 from ClientSide import ClientSide
 
+#   Unit Test for running a file transfer between clients
+
 ss = ServerSide()
 cs = ClientSide("test_pc", "0.0.0.0", "8080", "8081")
 
