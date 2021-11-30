@@ -68,7 +68,7 @@ class UDP_client:
         elif choice == '6':
             return self.cs.SEARCH_FILE(arg)
         elif choice == '7':
-            return self.cs.RETRIEVE_INFOT
+            return self.cs.RETRIEVE_INFOT(arg)
         elif choice == '8':
             return self.cs.UPDATE_CONTACT()
         elif choice == 'q':
@@ -81,7 +81,7 @@ class UDP_client:
             # msg = self.send_helper()
         if msg is None:
             reply = "Message is NONE"
-        
+
         msg_json_cs = json.dumps(msg)
         msg_encoded = msg_json_cs.encode()
 
