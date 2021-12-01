@@ -1,2 +1,2 @@
 # COEN366
-Peer to peer file transfer server/clinet
+Peer to peer file transfer server/client
