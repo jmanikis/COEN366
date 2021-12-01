@@ -124,7 +124,8 @@ class ClientSide:
         if dict_in is None:
             return None
         header = dict_in['header']
-        self.handle_rq(dict_in)
+        if not self.handle_rq(dict_in):
+            return f"Unknown request number received with request: {dict_in}"
         try:
             assert type(header) == str
         except Exception as e:
@@ -184,3 +185,6 @@ class ClientSide:
         if existing_request is not None:
             self.pending_rq.remove(existing_request)
             print(f"PENDING: {self.pending_rq}")
+            return True
+        else:
+            return False
